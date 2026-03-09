@@ -2255,11 +2255,35 @@
 <script src="supabase-storage.js"></script>
 <script>
   (function () {
-    function loadScript(src, callback) {
+    var domContentLoadedFired = document.readyState !== 'loading';
+    if (!domContentLoadedFired) {
+      document.addEventListener('DOMContentLoaded', function () {
+        domContentLoadedFired = true;
+      }, { once: true });
+    }
+
+    function hideLoadingOverlay() {
+      var overlay = document.getElementById('loadingOverlay');
+      if (!overlay) return;
+      overlay.style.opacity = '0';
+      setTimeout(function () {
+        overlay.style.display = 'none';
+      }, 300);
+    }
+
+    function replayDomContentLoadedForLateScript() {
+      // script1.js relies on DOMContentLoaded for bootstrap.
+      // When loaded after Supabase preload, native DOMContentLoaded has often fired.
+      if (!domContentLoadedFired) return;
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+    }
+
+    function loadScript(src, callback, onError) {
       var s = document.createElement('script');
       s.src = src;
       s.onerror = function () {
         console.error('[boot] failed to load script:', src);
+        if (typeof onError === 'function') onError();
       };
       s.onload = function () {
         if (typeof callback === 'function') callback();
@@ -2272,7 +2296,11 @@
       if (booted) return;
       booted = true;
       loadScript('script1.js', function () {
+        replayDomContentLoadedForLateScript();
         loadScript('theme-switcher.js');
+                hideLoadingOverlay();
+      }, function () {
+        hideLoadingOverlay();
       });
     }
 
@@ -2282,7 +2310,14 @@
     }
 
     document.addEventListener('supabase-storage-ready', bootApp, { once: true });
-    setTimeout(bootApp, 8000);
+        setTimeout(function () {
+            bootApp();
+            hideLoadingOverlay();
+        }, 8000);
+
+        window.addEventListener('load', function () {
+            setTimeout(hideLoadingOverlay, 1200);
+        }, { once: true });
   })();
 </script>
 <audio id="successSound" preload="auto">

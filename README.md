@@ -28,38 +28,52 @@ python -m http.server 5500
 
 ## Supabase 配置（必做）
 
-1. 在 Supabase SQL Editor 执行以下建表 SQL：
+1. 在 Supabase SQL Editor 执行项目脚本 [`sql/supabase_init.sql`](sql/supabase_init.sql)。
+如果你想直接粘贴，也可使用下方 SQL：
 
 ```sql
 create table if not exists public.app_storage (
   namespace text not null,
   key text not null,
   value text,
+  created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   primary key (namespace, key)
 );
-```
 
-2. 执行 RLS 策略（演示环境可先全开放，生产建议按用户收紧）：
-
-```sql
 alter table public.app_storage enable row level security;
 
+drop policy if exists "anon read app_storage" on public.app_storage;
 create policy "anon read app_storage"
 on public.app_storage
 for select
 to anon
 using (true);
 
-create policy "anon write app_storage"
+drop policy if exists "anon insert app_storage" on public.app_storage;
+create policy "anon insert app_storage"
 on public.app_storage
-for all
+for insert
+to anon
+with check (true);
+
+drop policy if exists "anon update app_storage" on public.app_storage;
+create policy "anon update app_storage"
+on public.app_storage
+for update
 to anon
 using (true)
 with check (true);
+
+drop policy if exists "anon delete app_storage" on public.app_storage;
+create policy "anon delete app_storage"
+on public.app_storage
+for delete
+to anon
+using (true);
 ```
 
-3. 编辑 `supabase-config.js`：
+2. 编辑 `supabase-config.js`：
 
 ```js
 window.__SUPABASE_CONFIG__ = {

@@ -2258,13 +2258,19 @@
     function loadScript(src, callback) {
       var s = document.createElement('script');
       s.src = src;
+      s.onerror = function () {
+        console.error('[boot] failed to load script:', src);
+      };
       s.onload = function () {
         if (typeof callback === 'function') callback();
       };
       document.body.appendChild(s);
     }
 
+    var booted = false;
     function bootApp() {
+      if (booted) return;
+      booted = true;
       loadScript('script1.js', function () {
         loadScript('theme-switcher.js');
       });
@@ -2276,6 +2282,7 @@
     }
 
     document.addEventListener('supabase-storage-ready', bootApp, { once: true });
+    setTimeout(bootApp, 8000);
   })();
 </script>
 <audio id="successSound" preload="auto">

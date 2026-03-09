@@ -4,6 +4,7 @@
   var anonKey = cfg.anonKey || '';
   var table = cfg.table || 'app_storage';
   var namespace = cfg.namespace || 'banxuexing';
+  var requestTimeoutMs = Number(cfg.requestTimeoutMs) > 0 ? Number(cfg.requestTimeoutMs) : 8000;
 
   var cache = new Map();
   var upsertQueue = new Map();
@@ -33,6 +34,28 @@
       });
     }
     return h;
+  }
+
+  async function request(url, options) {
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = null;
+    var opts = options || {};
+    if (controller) {
+      opts = Object.assign({}, opts, { signal: controller.signal });
+      timer = setTimeout(function () {
+        controller.abort();
+      }, requestTimeoutMs);
+    }
+    try {
+      return await fetch(url, opts);
+    } catch (err) {
+      if (err && err.name === 'AbortError') {
+        throw new Error('request timeout after ' + requestTimeoutMs + 'ms');
+      }
+      throw err;
+    } finally {
+      if (timer) clearTimeout(timer);
+    }
   }
 
   function asKey(value) {
@@ -71,7 +94,7 @@
     deleteQueue.clear();
 
     if (upserts.length > 0) {
-      var upsertRes = await fetch(baseUrl + '/rest/v1/' + table, {
+      var upsertRes = await request(baseUrl + '/rest/v1/' + table, {
         method: 'POST',
         headers: headers({
           'Content-Type': 'application/json',
@@ -91,7 +114,7 @@
       var q =
         '?namespace=eq.' + encodeURIComponent(namespace) +
         '&key=eq.' + encodeURIComponent(key);
-      var delRes = await fetch(baseUrl + '/rest/v1/' + table + q, {
+      var delRes = await request(baseUrl + '/rest/v1/' + table + q, {
         method: 'DELETE',
         headers: headers({ Prefer: 'return=minimal' }),
         keepalive: true
@@ -114,7 +137,7 @@
       '?namespace=eq.' + encodeURIComponent(namespace) +
       '&select=key,value';
 
-    var res = await fetch(baseUrl + '/rest/v1/' + table + query, {
+    var res = await request(baseUrl + '/rest/v1/' + table + query, {
       method: 'GET',
       headers: headers(),
       cache: 'no-store'

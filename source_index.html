@@ -1,0 +1,2124 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>å¥½å­¦ä¼´ - å­¦ä¹ è®¡åä¸æå¡ç»è®¡å©æ</title>
+<script src="chart.min.js"></script>
+<script src="chartjs-plugin-datalabels.min.js"></script>
+   <link rel="all.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/font-awesome@6.4.0/css/all.min.css';">
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p style="margin-top: 20px; font-weight: 600; color: #4b6cb7;">å è½½ä¸­ï¼è¯·ç¨å...</p>
+    </div>
+
+    <div class="container">
+      <header>
+  <div class="header-content">
+    <div class="header-left">
+      <div class="title-container">
+        å¥½å­¦ä¼´--å­¦ä¹ è®¡åä¸æå¡ç»è®¡å©æ
+      </div>
+      <p id="subTitle" style="margin: 5px 0 0 0; font-size: 0.9rem; color: rgba(255, 255, 255, 0.8);">ä½ å·²åææå¡<span id="subDays">0</span>å¤©ï¼ç´¯è®¡å®æ<span id="subTasks">0</span>ä¸ªå­¦ä¹ è®¡åï¼</p>
+    </div>
+    <div class="header-right">
+      
+      <div class="account-controls">
+        <button class="account-trigger" id="accountTrigger">
+          <span id="currentAccountName">å®å®</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+<ul class="account-menu" id="accountMenu"></ul>
+
+        <div class="today-stats">
+            <div class="stat-card" id="todayStudyTimeCard">
+			<p>ä»æ¥å­¦ä¹ æ¶é´</p>
+                <h3 id="todayStudyTime">0.0h</h3>
+            </div>
+            <div class="stat-card" id="sportsTimeCard">
+			 <p>è¿å¨æ·å¤æ¶é´</p>
+                <h3 id="sportsTime">0.0h</h3>
+            </div>
+
+            <div class="stat-card" id="completedTasksCard">
+			 <p>ä»æ¥ä»»å¡æ°é</p>
+                <h3 id="completedTasks">0/0</h3>  
+            </div>
+
+            <div class="stat-card" id="completionRateCard">
+			 <p>ä»æ¥å®æè¿åº¦</p>
+                <h3 id="completionRate">0%</h3>
+            </div>
+            <div class="stat-card" id="statsCard">
+			 <p>ç»è®¡å¾è¡¨æ±æ»</p>
+                <h3><i class="fas fa-chart-pie" data-fallback="å¾"></i></h3>
+            </div>
+			<div class="stat-card" id="badgeWallCard">
+    <p>è£èªåç« å±ç¤º</p>
+    <h3><i class="fas fa-trophy" data-fallback="å"></i></h3>
+</div>
+<div class="stat-card" id="scoreStatsCard">
+    <p>æç»©è¿½è¸ªç»è®¡</p>
+    <h3><i class="fas fa-chart-line" data-fallback="ç»©"></i></h3>
+</div>
+<div class="stat-card" id="pointsCard">
+        <p>ç§¯åå¥å±åæ¢</p>
+        <h3 id="pointsDisplayValue">0</h3>
+    </div>
+        </div>
+
+        <div id="home-page">
+            <div class="main-content">
+                <div class="sidebar collapsed" id="sidebar">
+                    
+<div class="sidebar-header">
+    <h2 id="sidebarTitle"><i class="fas fa-list" data-fallback="ç±»"></i> è®¡åæ¨¡çç®¡ç</h2>
+    <button class="add-category-btn" id="addCategoryBtn">+</button>
+</div>
+
+                    <ul class="category-list" id="categoryList">
+                        
+                    </ul>
+                </div>
+
+                <div class="tasks-container" id="tasksContainer">
+                    <div class="tasks-header-container">
+                        
+                                    <div class="header-row">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <h2 style="margin: 0;"><i class="fas fa-tasks" data-fallback="ä»»"></i> å­¦ä¹ è®¡å</h2>
+                
+                <div class="sort-container" style="position: relative; display: inline-block;">
+                    <button class="sort-btn" id="sortBtn" style="background: #6c757d; border: none; border-radius: 6px; padding: 6px 10px; color: white; cursor: pointer; font-size: 0.9rem;">
+                        <i class="fas fa-sort" data-fallback="æ"></i>
+                    </button>
+                  <div id="sortDropdown" class="sort-dropdown" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 6px; background: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,.15); padding: 8px; min-width: 180px; z-index: 1000; flex-direction: column; gap: 6px;">
+    <div class="sort-option" data-sort="time"   style="display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:15px;color:#333;border-radius:8px;cursor:pointer;transition:background .2s;"><i class="fas fa-clock"        style="color:#4b6cb7;width:18px;text-align:center;"></i>æè®¡åæ¶é´</div>
+    <div class="sort-option" data-sort="actual" style="display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:15px;color:#333;border-radius:8px;cursor:pointer;transition:background .2s;"><i class="fas fa-hourglass-half" style="color:#4b6cb7;width:18px;text-align:center;"></i>æå®éæ¶é´</div>
+    <div class="sort-option" data-sort="category" style="display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:15px;color:#333;border-radius:8px;cursor:pointer;transition:background .2s;"><i class="fas fa-layer-group"  style="color:#4b6cb7;width:18px;text-align:center;"></i>æåç±»åç§°</div>
+    <div class="sort-option" data-sort="custom"  style="display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:15px;color:#333;border-radius:8px;cursor:pointer;transition:background .2s;"><i class="fas fa-hand-pointer" style="color:#4b6cb7;width:18px;text-align:center;"></i>èªå®ä¹æåº</div>
+</div>
+                </div>
+            </div>
+            <div class="action-buttons-container">
+                <button class="add-task-main-btn" id="addBatchTaskBtn" style="background: #5bc0de;">
+                    <i class="fas fa-list" data-fallback="æ¹"></i> æ¹éæ·»å 
+                </button>
+                <button class="add-task-main-btn" id="addTaskBtn">
+                    <i class="fas fa-plus" data-fallback="+"></i> æ·»å è®¡å
+                </button>
+            </div>
+        </div>
+
+                        
+                        <div class="date-row">
+                            <div class="date-info">
+                                <div class="current-date-display" id="currentDateDisplay">2023å¹´7æç¬¬1å¨</div>
+                                <div class="week-controls">
+                                    <div class="week-toggle">
+
+                                    </div>
+                                </div>
+                            </div>
+ 
+            <div class="overdue-toggle" style="display: flex; align-items: center; margin-right: 15px;">
+                <input type="checkbox" id="showOverdueTasks">
+                <label for="showOverdueTasks" style="margin-left: 5px; font-size: 0.9rem;">é¾æä»»å¡</label>
+            </div>
+            <div class="date-controls">
+                <button class="nav-btn" id="prevBtn">
+                    <i class="fas fa-chevron-left" data-fallback="<"></i>
+                </button>
+                <button class="today-btn" id="todayBtn">
+                     ä»å¤©
+                </button>
+                <button class="nav-btn" id="nextBtn">
+                    <i class="fas fa-chevron-right" data-fallback=">"></i>
+                </button>
+                <button class="calendar-toggle" id="calendarBtn">
+                    <i class="fas fa-calendar-alt" data-fallback="æ"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="week-days-container" id="weekViewContainer">
+        <div class="week-days" id="weekDays">
+            
+        </div>
+    </div>
+
+    <div class="task-list-main" id="taskListMain">
+        
+    </div>
+</div>
+</div>
+</div>
+
+
+<div class="stats-page" id="statsPage">
+    <div class="stats-header">
+        <h2><i class="fas fa-chart-bar" data-fallback="ç»"></i> å­¦ä¹ æ°æ®ç»è®¡</h2>
+        <button class="back-btn" id="backToHome">
+            <i class="fas fa-arrow-left" data-fallback="è¿"></i> è¿åè®¡å
+        </button>
+    </div>
+
+                
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="display: inline-block; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <label style="margin-right: 10px; font-weight: bold;">éæ©æ¥æèå´ï¼</label>
+                    <input type="date" id="statsStartDate" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-right: 10px;">
+                    <span style="margin-right: 10px;">è³</span>
+                    <input type="date" id="statsEndDate" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <button id="statsFilterBtn" style="margin-left: 10px; padding: 8px 15px; background: #4b6cb7; color: white; border: none; border-radius: 5px; cursor: pointer;">ç­é</button>
+                </div>
+            </div>
+
+            
+            <div class="stats-grid">
+                <div class="stat-chart">
+                    <h3>æ¯æ¥è®¡åå®ææåµ</h3>
+                    <div class="chart-container">
+                        <canvas id="dailyTasksChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-chart">
+                    <h3>æ¯æ¥å­¦ä¹ æ¶é´ VS è¿å¨æ¶é´ VS å¨±ä¹æ¶é´</h3>
+                    <div class="chart-container">
+                        <canvas id="dailyTimeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-chart">
+                    <h3>ååç±»æ»ç¨æ¶å æ¯</h3>
+                    <div class="chart-container">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-chart">
+                    <h3>ååç±»æ¯æ¥ç¨æ¶å¯¹æ¯</h3>
+                    <div class="chart-container">
+                        <canvas id="categoryDailyChart"></canvas>
+                    </div>
+                </div>
+				
+<div class="stat-chart">
+  <h3 style="display:flex;justify-content:space-between;align-items:center;">
+    è®¡åç¨æ¶ vs å®éç¨æ¶
+    <select id="planActualMode" style="font-size:0.9rem;padding:4px 8px;border-radius:4px;border:1px solid #ddd;">
+      <option value="category">æç§ç®</option>
+      <option value="task">æä»»å¡</option>
+    </select>
+  </h3>
+  <div class="chart-container">
+    <canvas id="planActualChart"></canvas>
+  </div>
+</div>
+
+<div class="stat-chart">
+    <h3>ä»»å¡å®æç±»ååå¸</h3>
+    <div class="chart-container">
+        <canvas id="completionTypeChart"></canvas>
+    </div>
+</div>
+            </div>
+</div>
+
+<div class="stats-page" id="badgePage" style="display: none;">
+    <div class="stats-header">
+        <h2>
+  <i class="fas fa-trophy" data-fallback="å"></i> åç« å¢
+  <span id="badgeCount" style="
+ margin-left: 12px;
+ padding: 2px 10px;
+ font-size: 0.7em;
+ background: linear-gradient(135deg, #fff9c4 0%, #ffd700 100%);
+ color: #b8860b;
+ border-radius: 12px;
+ box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+ font-weight: 600;
+ letter-spacing: 0.5px;
+">
+</h2>
+        <button class="back-btn" id="backToHomeFromBadge">
+            <i class="fas fa-arrow-left" data-fallback="è¿"></i> è¿åè®¡å
+        </button>
+    </div>
+
+    <div class="badge-controls">
+    <button class="add-task-main-btn" id="addBadgeBtn" style="background: #4b6cb7;">
+        <i class="fas fa-plus" data-fallback="æ·»"></i> æ·»å åç« 
+    </button>
+    <button class="add-task-main-btn" id="addBatchBadgeBtn" style="background: #28a745;">
+        <i class="fas fa-list" data-fallback="æ¹"></i> æ¹éæ·»å åç« 
+    </button>
+    <button class="btn btn-danger" id="clearAllBadgeBtn">
+        <i class="fas fa-trash"></i> æ¸ç©ºåç« 
+    </button>
+</div>
+
+    <div class="badge-grid" id="badgeGrid">
+        
+    </div>
+</div>
+
+<div class="stats-page" id="scorePage" style="display: none;">
+    <div class="stats-header">
+        <h2><i class="fas fa-chart-line" data-fallback="ç»©"></i> æç»©ç»è®¡è¿½è¸ª</h2>
+        <button class="back-btn" id="backToHomeFromScore">
+            <i class="fas fa-arrow-left" data-fallback="è¿"></i> è¿åè®¡å
+        </button>
+    </div>
+
+    <div class="score-controls">
+        <button class="add-task-main-btn" id="addScoreBtn" style="background: #4b6cb7;">
+            <i class="fas fa-plus" data-fallback="æ·»"></i> æ·»å æç»©
+        </button>
+        <button class="add-task-main-btn" id="scoreAnalysisBtn" style="background: #28a745;">
+            <i class="fas fa-chart-bar" data-fallback="æ"></i> æç»©åæ
+        </button>
+    </div>
+
+<div class="score-filters" style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px; padding: 10px; background-color: var(--card-bg, #f8f9fa); border-radius: 8px;">
+    <div style="display: flex; align-items: center; gap: 5px;">
+        <label for="filterYear">å­¦å¹´:</label>
+        <select id="filterYear" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="">å¨é¨</option>
+            
+        </select>
+    </div>
+    <div style="display: flex; align-items: center; gap: 5px;">
+        <label for="filterGrade">å¹´çº§:</label>
+        <select id="filterGrade" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="">å¨é¨</option>
+            
+        </select>
+    </div>
+    <div style="display: flex; align-items: center; gap: 5px;">
+        <label for="filterSemester">å­¦æ:</label>
+        <select id="filterSemester" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="">å¨é¨</option>
+            
+        </select>
+    </div>
+    <div style="display: flex; align-items: center; gap: 5px;">
+        <label for="filterSubject">ç§ç®:</label>
+        <select id="filterSubject" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="">å¨é¨</option>
+            
+        </select>
+        
+        <button id="resetScoreFilters" style="padding: 5px 10px; margin-left: 5px;">éç½®</button>
+    </div>
+</div>
+
+    <div class="score-cards-container" id="scoreCardsContainer">
+        
+    </div>
+</div>
+
+<div class="stats-page" id="scoreAnalysisPage" style="display: none;">
+    <div class="stats-header">
+        <h2><i class="fas fa-chart-bar" data-fallback="æ"></i> æç»©åæ</h2>
+        <button class="back-btn" id="backToScoreFromAnalysis">
+            <i class="fas fa-arrow-left" data-fallback="è¿"></i> è¿åæç»©åè¡¨
+        </button>
+    </div>
+
+    <div class="score-analysis-filters" style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px; padding: 10px; background-color: var(--card-bg, #f8f9fa); border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <label for="analysisStartDate">å¼å§æ¥æ:</label>
+            <input type="date" id="analysisStartDate" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <label for="analysisEndDate">ç»ææ¥æ:</label>
+            <input type="date" id="analysisEndDate" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+        </div>
+        <button id="applyAnalysisDateFilter" style="padding: 6px 12px; margin-left: 5px; background-color: var(--primary, #007bff); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">ç­é</button>
+        <button id="resetAnalysisDateFilter" style="padding: 6px 12px; margin-left: 5px; background-color: var(--secondary, #6c757d); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">éç½®</button>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-chart">
+            <h3>åç§ç®æç»©è¶å¿</h3>
+            <div class="chart-container">
+                <canvas id="scoreTrendChart"></canvas>
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>åç§ç®å¹³åå¾åç </h3> 
+            <div class="chart-container">
+                <canvas id="subjectComparisonChart"></canvas>
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>ç®æ ä¸å®éæç»©å·®è·å¾</h3>
+            <div class="chart-container">
+                <canvas id="targetActualChart"></canvas>
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>æåååè¶å¿</h3>
+            <div class="chart-container">
+                <canvas id="rankingTrendChart"></canvas>
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>æç»©ä½ç½®ç´æ¹å¾</h3> 
+            <div class="chart-container">
+                <canvas id="examTypeChart"></canvas> 
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>èå¼±ç¯èåæ</h3> 
+            <div class="chart-container">
+                <canvas id="scorePerformanceChart"></canvas> 
+            </div>
+        </div>
+		<div class="stat-chart">
+    <h3><i class="fas fa-chart-pie" data-fallback="é¥¼"></i> èè¯è¡¨ç°åæ</h3>
+    <div class="chart-container">
+        <canvas id="performancePieChart"></canvas>
+    </div>
+</div>
+    </div>
+</div>
+
+<div class="stats-page" id="pointsExchangePage" style="display: none;">
+    <div class="stats-header">
+        <h2><i class="fas fa-gem"></i> ç§¯åå¥å±åæ¢</h2>
+        <button class="back-btn" id="backToHomeFromPointsExchange"><i class="fas fa-arrow-left"></i> è¿åè®¡å</button>
+    </div>
+    <div class="points-exchange-content">
+        <div class="tabs">
+		 <button class="tab-btn active" data-tab="rewards">å¥å±æ± </button>
+            <button class="tab-btn" data-tab="records">ç§¯åè®°å½</button>
+
+        </div>
+       <div class="tab-content" id="recordsTab">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3>ç§¯åè®°å½</h3>
+        <button class="btn btn-danger" id="clearPointsRecordsBtn">
+            <i class="fas fa-trash-alt"></i> æ¸ç©ºç§¯åè®°å½
+        </button>
+    </div>
+    <table class="points-records-table">
+        <thead>
+            <tr>
+                <th>ä»»å¡æå±æ¥æ</th>
+                <th>æä½æ¶é´</th>
+                <th>ä»»å¡åç§°</th>
+                <th>æå¡ç»æ</th>
+                <th>ç§¯ååå¨</th>
+                <th>ä½é¢</th>
+            </tr>
+        </thead>
+        <tbody id="pointsRecordsTableBody">
+            
+        </tbody>
+    </table>
+	
+            <div id="pointsRecordsPagination" class="pagination-container" style="display: none; margin-top: 15px; justify-content: center; align-items: center; gap: 5px;">
+                
+            </div>
+</div>
+        <div class="tab-content active" id="rewardsTab">
+            <div class="rewards-header">
+                <button class="add-task-main-btn" id="addRewardBtn"><i class="fas fa-plus"></i> æ·»å å¥å±</button>
+            </div>
+            <div class="rewards-grid" id="rewardsGrid">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="rewardModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="rewardModalTitle">æ·»å æ°å¥å±</h3>
+            <button class="close-modal" id="closeRewardModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingRewardId">
+            <div class="form-group">
+                <label for="rewardName" class="required">å¥å±åç§°</label>
+                <input type="text" class="form-control" id="rewardName" placeholder="è¾å¥å¥å±åç§°" required maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="rewardDescription">å¥å±åå®¹</label>
+                <textarea class="form-control" id="rewardDescription" rows="3" placeholder="æè¿°å¥å±åå®¹"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="rewardPointsRequired" class="required">æéç§¯å</label>
+                <input type="number" class="form-control" id="rewardPointsRequired" placeholder="æéç§¯å" required min="1">
+            </div>
+			
+<div class="form-group">
+    <label for="rewardQuantity" class="required">å¯åæ¢æ°é</label>
+    <input type="number" class="form-control" id="rewardQuantity" placeholder="å¯åæ¢æ¬¡æ° (0ä¸ºæ é)" required min="0" value="1">
+</div>
+
+       <div class="form-group">
+    <label for="rewardIcon">å¥åå¾æ </label>
+    <div class="icon-selection-container" id="rewardIconSelection">
+        <div class="icon-option" data-icon="fa-gift">
+            <i class="fas fa-gift"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-star">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-trophy">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-heart">
+            <i class="fas fa-heart"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-smile">
+            <i class="fas fa-smile"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-candy-cane">
+            <i class="fas fa-candy-cane"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-gamepad">
+            <i class="fas fa-gamepad"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-film">
+            <i class="fas fa-film"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-music">
+            <i class="fas fa-music"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-book">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-pizza-slice">
+            <i class="fas fa-pizza-slice"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-ice-cream">
+            <i class="fas fa-ice-cream"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-dog">
+            <i class="fas fa-dog"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-bed">
+            <i class="fas fa-bed"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-utensils">
+            <i class="fas fa-utensils"></i>
+        </div>
+        
+        <div class="icon-option" data-icon="fa-cookie">
+            <i class="fas fa-cookie"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-headphones">
+            <i class="fas fa-headphones"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-laptop">
+            <i class="fas fa-laptop"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-shopping-bag">
+            <i class="fas fa-shopping-bag"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-camera">
+            <i class="fas fa-camera"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-bicycle">
+            <i class="fas fa-bicycle"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-plane">
+            <i class="fas fa-plane"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-car">
+            <i class="fas fa-car"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-rocket">
+            <i class="fas fa-rocket"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-diamond">
+            <i class="fas fa-diamond"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-coins">
+            <i class="fas fa-coins"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-gem">
+            <i class="fas fa-gem"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-paint-brush">
+            <i class="fas fa-paint-brush"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-guitar">
+            <i class="fas fa-guitar"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-tv">
+            <i class="fas fa-tv"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-book-open">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-map-marker-alt">
+            <i class="fas fa-map-marker-alt"></i>
+        </div>
+    </div>
+    
+    <input type="hidden" id="rewardIcon" value="fa-gift"> 
+</div>
+
+<div class="form-group">
+    <label for="rewardIconColor">å¾æ é¢è²</label>
+    <div id="rewardColorPicker" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #4b6cb7;" data-color="#4b6cb7" title="èè²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #5cb85c;" data-color="#5cb85c" title="ç»¿è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #f0ad4e;" data-color="#f0ad4e" title="æ©è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #d9534f;" data-color="#d9534f" title="çº¢è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #5bc0de;" data-color="#5bc0de" title="éè²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #aa66cc;" data-color="#aa66cc" title="ç´«è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #95a5a6;" data-color="#95a5a6" title="ç°è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #e67e22;" data-color="#e67e22" title="æ·±æ©è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #3498db;" data-color="#3498db" title="äº®èè²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #2ecc71;" data-color="#2ecc71" title="äº®ç»¿è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #e74c3c;" data-color="#e74c3c" title="äº®çº¢è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #f1c40f;" data-color="#f1c40f" title="é»è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #00bcd4;" data-color="#00bcd4" title="èç»¿è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #ffeb3b;" data-color="#ffeb3b" title="äº®é»è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #ff9800;" data-color="#ff9800" title="ææ©è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #cddc39;" data-color="#cddc39" title="é»ç»¿è²"></div>
+    </div>
+    <input type="hidden" id="rewardIconColor" value="#4b6cb7">
+</div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelRewardBtn">åæ¶</button>
+            <button class="btn btn-danger" id="deleteRewardBtn" style="display: none;">å é¤å¥å±</button>
+            <button class="btn btn-primary" id="saveRewardBtn">ä¿å­å¥å±</button>
+        </div>
+    </div>
+</div>
+
+<div class="data-buttons">
+    <button class="data-btn export-btn" id="exportBtn">
+        <i class="fas fa-download" data-fallback="ä¸"></i> å¤ä»½æ°æ®
+    </button>
+    <button class="data-btn import-btn" id="importBtn">
+        <i class="fas fa-upload" data-fallback="ä¸"></i> å¯¼å¥æ°æ®
+    </button>
+    <button class="data-btn clear-btn" id="clearDataBtn">
+        <i class="fas fa-trash" data-fallback="æ¸"></i> æ¸ç©ºå­¦ä¹ è®¡å
+    </button>
+</div>
+
+<footer>
+    <p>å¥½å­¦ä¼´ - å­¦ä¹ è®¡åä¸æå¡ç»è®¡å©æ | ç±å°çº¢ä¹¦åä¸»âå¸èå¸âååå¶ä½ </p>
+</footer>
+</div>
+
+
+<div class="modal" id="monthViewModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>æè§å¾</h3>
+            <button class="close-modal" id="closeMonthModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="calendar-header">
+                <div class="calendar-title" id="calendarTitle">2023å¹´7æ</div>
+                <div class="calendar-nav">
+                    <button class="nav-btn" id="prevMonthBtn">
+                        <i class="fas fa-chevron-left" data-fallback="<"></i>
+                    </button>
+                    <button class="nav-btn" id="nextMonthBtn">
+                        <i class="fas fa-chevron-right" data-fallback=">"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="taskModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">æ·»å æ°è®¡å</h3>
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingTaskId">
+		<div class="form-group">
+    <div style="display: flex; gap: 10px;">
+               <div style="flex: 1;">
+            <label for="taskCategory" class="required">ä»»å¡åç±»</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <select class="form-control" id="taskCategory" required style="flex:1;">
+                    
+                </select>
+                <button type="button" id="addCategoryFromTaskBtn" class="btn btn-primary"
+                        style="height:36px;width:36px;padding:0;font-size:1.2rem;"
+                        title="æ°å¢åç±»">
+                    +
+                </button>
+            </div>
+        </div>
+        <div style="flex: 2; position: relative;">
+    <label for="taskTemplateInput" class="required">ä»»å¡åç§°</label>
+    <input type="text" class="form-control" id="taskTemplateInput" placeholder="è¾å¥æéæ©ä»»å¡åç§°" required autocomplete="off">
+    <div id="customDropdown" class="custom-dropdown" style="display: none;">
+        
+    </div>
+    <input type="hidden" id="taskTemplateId">
+
+</div>
+    </div>
+</div>
+
+            <div class="form-group">
+                <label for="taskDescription" >ä»»å¡è¯´æ</label>
+                <textarea class="form-control" id="taskDescription" rows="3" placeholder="è¾å¥ä»»å¡è¯´æï¼éå¡«ï¼" ></textarea>
+            </div>
+<div style="margin-top: 5px; display: none;" id="saveTemplateContainer">
+        <input type="checkbox" id="saveAsTemplate"> <label for="saveAsTemplate" style="font-size: 0.9rem;">åæ¶å°ä»¥ä¸ä»»å¡åå®¹å­ä¸ºæ¨¡æ¿</label>
+    </div>
+                       <div class="form-group">
+                <label>è®¡åæ¶é´ï¼éå¡«ï¼</label>
+                <div class="time-inputs">
+                    <input type="time" class="form-control" id="startTime">
+					 <span style="margin: 15px 5px 0px;">è³</span>
+                    <input type="time" class="form-control" id="endTime">
+                </div>
+            </div>
+<div class="form-group">
+    <label for="plannedDuration">è®¡åç¨æ¶ï¼åéï¼éå¡«ï¼</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="flex: 1;">
+            <input type="number" class="form-control" id="plannedDuration" placeholder="å¦ï¼30" min="1" max="480"
+       oninput="toggleAutoCompleteSwitch()">
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+           <label for="autoCompleteSwitch" style="margin-left: 8px; font-size: 0.9rem;">å°æ¶èªå¨å®æ</label>
+<label class="switch">
+    <input type="checkbox" id="autoCompleteSwitch" disabled>
+    <span class="slider round"></span>
+</label>
+        </div>
+    </div>
+</div>
+        <div class="form-group">
+    <label for="repeatSelect" class="required">éå¤é¢çï¼ä¿å­åä¸åè®¸ä¿®æ¹ï¼</label>
+    <select class="form-control" id="repeatSelect">
+        <option value="none">ä»å½å¤©</option>
+        <option value="daily">æ¯å¤©</option>
+        <option value="weekly">æ¯å¨çè¿å¤©</option>
+		<option value="weeklyMulti">æ¯å¨ï¼èªéæ¥æï¼</option>
+        <option value="weekdays">å¨ä¸è³å¨äº</option>
+		 <option value="ebinhous">è¾å®¾æµ©æ¯å¨æ</option>
+        <option value="custom">èªå®ä¹</option>
+    </select>
+</div>
+
+
+<div class="form-group" id="repeatOptionsContainer" style="display: none; margin-top: 10px; background: #f5f5f5; padding: 10px; border-radius: 5px;">
+    
+    <div id="weeklyOptions" style="display: none;">
+        <label>æ¯<input type="number" id="weeksInterval" min="1" max="10" value="1" style="width: 50px; padding: 5px;"> å¨éå¤ä¸æ¬¡</label>
+    </div>
+
+    <div id="weeklyMultiOptions" style="display: none;">
+        <label style="margin-right: 8px;">æ¯å¨ï¼</label>
+        <div class="week-day-group" style="display: inline-flex; gap: 6px;">
+            <button type="button" class="week-day-btn" data-day="1">ä¸</button>
+            <button type="button" class="week-day-btn" data-day="2">äº</button>
+            <button type="button" class="week-day-btn" data-day="3">ä¸</button>
+            <button type="button" class="week-day-btn" data-day="4">å</button>
+            <button type="button" class="week-day-btn" data-day="5">äº</button>
+            <button type="button" class="week-day-btn" data-day="6">å­</button>
+            <button type="button" class="week-day-btn" data-day="0">æ¥</button>
+        </div>
+    </div>
+    
+    <div id="customOptions" style="display: none;">
+        <label>æ¯ <input type="number" id="daysInterval" min="1" max="30" value="1" style="width: 50px; padding: 5px;"> å¤©éå¤ä¸æ¬¡</label>
+    </div>
+</div>
+  <div class="form-group" id="dateRangeGroup">
+    <label class="required">èµ·å§æ¥æï¼ä¿å­åä¸åè®¸ä¿®æ¹ï¼</label>
+    <div class="time-inputs">
+        <input type="date" class="form-control" id="startDate" required>
+        <span style="margin: 15px 5px 0px;">è³</span>
+        <input type="date" class="form-control" id="endDate" required>
+    </div>
+</div>
+
+<div class="form-group" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+    
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="pointsSwitch" style="margin: 0;">ç§¯åå¥æ©</label>
+        <label class="switch">
+            <input type="checkbox" id="pointsSwitch">
+            <span class="slider round"></span>
+        </label>
+    </div>
+
+    
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="summaryAfterFinishSwitch" style="margin: 0;">ç»æåå¼¹åºå­¦ä¹ æ»ç»</label>
+        <label class="switch">
+            <input type="checkbox" id="summaryAfterFinishSwitch">
+            <span class="slider round"></span>
+        </label>
+    </div>
+</div>
+
+
+<div class="form-group" id="pointsSettingsGroup" style="display: none;">
+    <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;"><i class="fas fa-gem"></i> ç§¯åè®¾ç½®ï¼æ­£æ°å åï¼è´æ°æ£åï¼</h4>
+    <div class="form-row" style="display: flex; align-items: end; gap: 15px;">
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="pointsReward">å®æå¥å± (æ­£å)</label>
+            <div class="input-with-buttons" style="display: flex; align-items: center;">
+                <button class="btn btn-outline-secondary" id="decreaseReward" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                <input type="text" class="form-control" id="pointsReward" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.max(0, parseInt(this.value) || 0);"> 
+                <button class="btn btn-outline-secondary" id="increaseReward" style="padding: 5px 10px; margin-left: 5px;">+</button>
+            </div>
+        </div>
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="pointsPenalty">æªå®ææ£å (è´å)</label>
+            <div class="input-with-buttons" style="display: flex; align-items: center;">
+                <button class="btn btn-outline-secondary" id="decreasePenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                <input type="text" class="form-control" id="pointsPenalty" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.min(0, parseInt(this.value) || 0);"> 
+                <button class="btn btn-outline-secondary" id="increasePenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+            </div>
+        </div>
+    </div>
+    <div style="display: flex; gap: 15px; margin-top: 15px;">
+        <div class="form-group" style="flex: 1; margin: 0;">
+            <label for="pointsLatePenalty">é¾æå®æ (å¯æ­£è´å)</label>
+            <div class="input-with-buttons" style="display: flex; align-items: center;">
+                <button class="btn btn-outline-secondary" id="decreaseLatePenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                <input type="text" class="form-control" id="pointsLatePenalty" value="0" style="margin: 0 5px; text-align: center;"> 
+                <button class="btn btn-outline-secondary" id="increaseLatePenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+            </div>
+        </div>
+        <div class="form-group" style="flex: 1; margin: 0;">
+            <label for="pointsTimeoutPenalty">è¶æ¶æ£å (è´å)</label>
+            <div class="input-with-buttons" style="display: flex; align-items: center;">
+                <button class="btn btn-outline-secondary" id="decreaseTimeoutPenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                <input type="text" class="form-control" id="pointsTimeoutPenalty" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.min(0, parseInt(this.value) || 0);">
+                <button class="btn btn-outline-secondary" id="increaseTimeoutPenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelBtn">åæ¶</button>
+                <button class="btn btn-primary" id="saveTaskBtn">ä¿å­è®¡å</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="batchTaskModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>æ¹éæ·»å ä»»å¡</h3>
+            <button class="close-modal" id="closeBatchModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>æ¹éè¾å¥ä»»å¡ï¼è¯·æé»è®¤æ ¼å¼å½å¥ï¼</label>
+              <textarea class="form-control" id="batchTaskInputNew" rows="10" placeholder="è¯·ç¡®ä¿ææç§ç®åç§°å·²ç»å½å¥æ¨¡çï¼å¦åæ æ³è¯å«&#10;è¯­æä½ä¸ï¼ç§ç®åç¬å ä¸è¡ï¼&#10;1ãå®æãå¤§éæ ä¸çå°å­¦ãéè¯»åï¼ä¸é¡¹ä½ä¸å ä¸è¡ï¼&#10;2ãé¢ä¹ ãè±çå­¦æ ¡ã&#10;æ°å­¦ä½ä¸ï¼å¶ä»ç§ç®åå¦èµ·ä¸è¡ï¼&#10;1ãå®æç»ä¹ åç¬¬10é¡µ&#10;2ãé¢ä¹ ä¸ä¸è"></textarea>
+                <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+
+                </div>
+            </div>
+
+                       
+            <div class="form-group">
+                <label>è®¡åæ¶é´ï¼éå¡«ï¼</label>
+                <div class="time-inputs">
+                    <input type="time" class="form-control" id="batchStartTime">
+                    <span style="margin:15px 5px 0px;">è³</span>
+                    <input type="time" class="form-control" id="batchEndTime">
+                </div>
+            </div>
+
+            
+            <div class="form-group">
+                <label for="batchPlannedDuration">è®¡åç¨æ¶ï¼åéï¼éå¡«ï¼</label>
+                <input type="number" class="form-control" id="batchPlannedDuration"
+                       placeholder="å¦ï¼30" min="1" max="480">
+            </div>
+
+            <div class="form-group">
+                <label for="batchRepeatSelect" class="required">éå¤é¢çï¼ä¿å­åä¸åè®¸ä¿®æ¹ï¼</label>
+                <select class="form-control" id="batchRepeatSelect">
+                    <option value="none">ä»å½å¤©</option>
+                    <option value="daily">æ¯å¤©</option>
+                    <option value="weekly">æ¯å¨çè¿å¤©</option>
+					<option value="weeklyMulti">æ¯å¨ï¼èªéæ¥æï¼</option>
+                    <option value="weekdays">å¨ä¸è³å¨äº</option>
+					<option value="ebinhous">è¾å®¾æµ©æ¯å¨æ</option>
+                    <option value="custom">èªå®ä¹</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="batchRepeatOptionsContainer" style="display: none; margin-top: 10px; background: #f5f5f5; padding: 10px; border-radius: 5px;">
+                
+                <div id="batchWeeklyOptions" style="display: none;">
+                    <label>æ¯<input type="number" id="batchWeeksInterval" min="1" max="10" value="1" style="width: 50px; padding: 5px;"> å¨éå¤ä¸æ¬¡</label>
+                </div>
+
+<div id="batchWeeklyMultiOptions" style="display: none; margin-top: 10px;">
+    <label style="margin-right: 8px;">æ¯å¨ï¼</label>
+    <div class="week-day-group" style="display: inline-flex; gap: 6px;">
+        <button type="button" class="week-day-btn" data-day="1">ä¸</button>
+        <button type="button" class="week-day-btn" data-day="2">äº</button>
+        <button type="button" class="week-day-btn" data-day="3">ä¸</button>
+        <button type="button" class="week-day-btn" data-day="4">å</button>
+        <button type="button" class="week-day-btn" data-day="5">äº</button>
+        <button type="button" class="week-day-btn" data-day="6">å­</button>
+        <button type="button" class="week-day-btn" data-day="0">æ¥</button>
+    </div>
+</div>
+                
+                <div id="batchCustomOptions" style="display: none;">
+                    <label>æ¯ <input type="number" id="batchDaysInterval" min="1" max="30" value="1" style="width: 50px; padding: 5px;"> å¤©éå¤ä¸æ¬¡</label>
+                </div>
+            </div>
+
+            <div class="form-group" id="batchDateRangeGroup">
+                <label class="required">èµ·å§æ¥æï¼ä¿å­åä¸åè®¸ä¿®æ¹ï¼</label>
+                <div class="time-inputs">
+                    <input type="date" class="form-control" id="batchStartDate" required>
+                    <span style="margin: 15px 5px 0px;">è³</span>
+                    <input type="date" class="form-control" id="batchEndDate" required>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelBatchBtn">åæ¶</button>
+                <button class="btn btn-primary" id="saveBatchBtn">ä¿å­è®¡å</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="categoryModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="categoryModalTitle">æ·»å æ¨¡çåç±»</h3>
+            <button class="close-modal" id="closeCategoryModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingCategoryId">
+            <div class="form-group">
+                <label for="categoryName" class="required">æ¨¡æ¿åç±»åç§°</label>
+                <input type="text" class="form-control" id="categoryName" placeholder="è¾å¥åç±»åç§°" required maxlength="10">
+                <div class="error-message" id="categoryNameError" style="color: red; font-size: 0.8rem; display: none;"></div>
+            </div>
+
+       <div class="form-group">
+    <label class="required">éæ©å¾æ </label>
+    <div class="icon-selection-container">
+        <div class="icon-option selected" data-icon="fa-book">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-calculator">
+            <i class="fas fa-calculator"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-language">
+            <i class="fas fa-language"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-running">
+            <i class="fas fa-running"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-laptop-code">
+            <i class="fas fa-laptop-code"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-globe-asia">
+            <i class="fas fa-globe-asia"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-music">
+            <i class="fas fa-music"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-paint-brush">
+            <i class="fas fa-paint-brush"></i>
+        </div>
+        
+        <div class="icon-option" data-icon="fa-pencil-alt">
+            <i class="fas fa-pencil-alt"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-square-root-alt">
+            <i class="fas fa-square-root-alt"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-flask">
+            <i class="fas fa-flask"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-history">
+            <i class="fas fa-history"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-palette">
+            <i class="fas fa-palette"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-basketball-ball">
+            <i class="fas fa-basketball-ball"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-utensils">
+            <i class="fas fa-utensils"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-heart">
+            <i class="fas fa-heart"></i>
+        </div>
+        
+        <div class="icon-option" data-icon="fa-atom">
+            <i class="fas fa-atom"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-dna">
+            <i class="fas fa-dna"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-map-marked-alt">
+            <i class="fas fa-map-marked-alt"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-balance-scale">
+            <i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-microscope">
+            <i class="fas fa-microscope"></i>
+        </div>
+    </div>
+    
+    <input type="hidden" id="categoryIcon" value="fa-book" required>
+</div>
+
+<div class="form-group">
+    <label for="categoryColor" class="required">éæ©é¢è²</label>
+    <div id="colorPicker" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(75, 108, 183, 0.8);" data-color="rgba(75, 108, 183, 0.8)" title="èè²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(92, 184, 92, 0.8);" data-color="rgba(92, 184, 92, 0.8)" title="ç»¿è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(255, 152, 0, 0.8);" data-color="rgba(255, 152, 0, 0.8)" title="æ©è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(244, 67, 54, 0.8);" data-color="rgba(244, 67, 54, 0.8)" title="çº¢è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(91, 192, 222, 0.8);" data-color="rgba(91, 192, 222, 0.8)" title="æµè"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(170, 102, 204, 0.8);" data-color="rgba(170, 102, 204, 0.8)" title="ç´«è²"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(0, 150, 136, 0.8);" data-color="rgba(0, 150, 136, 0.8)" title="éç»¿"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(233, 30, 99, 0.8);" data-color="rgba(233, 30, 99, 0.8)" title="ç²çº¢"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(63, 81, 181, 0.8);" data-color="rgba(63, 81, 181, 0.8)" title="éè"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(156, 39, 176, 0.8);" data-color="rgba(156, 39, 176, 0.8)" title="æ·±ç´«"></div>
+    </div>
+    <input type="hidden" id="categoryColor" value="rgba(75, 108, 183, 0.8)">
+</div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelCategoryBtn">åæ¶</button>
+                <button class="btn btn-primary" id="saveCategoryBtn">ä¿å­åç±»</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="templateModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="templateModalTitle">æ·»å æ°ä»»å¡æ¨¡æ¿</h3>
+            <button class="close-modal" id="closeTemplateModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingTemplateId">
+            <div class="form-group">
+                <label for="templateCategory" class="required">ä»»å¡åç±»</label>
+                <select class="form-control" id="templateCategory" required>
+                    
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="templateName" class="required">ä»»å¡åç§°</label>
+                <input type="text" class="form-control" id="templateName" placeholder="è¾å¥ä»»å¡åç§°" required maxlength="10">
+                <div class="error-message" id="templateNameError" style="color: red; font-size: 0.8rem; display: none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="templateDescription" class="required">ä»»å¡è¯´æ</label>
+                <textarea class="form-control" id="templateDescription" rows="3" placeholder="è¾å¥ä»»å¡è¯´æ" required></textarea>
+            </div>
+
+            
+            <div class="form-group" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 15px;">
+                
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="templatePointsSwitch" style="margin: 0;">ç§¯åå¥æ©</label>
+                    <label class="switch">
+                        <input type="checkbox" id="templatePointsSwitch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="templateSummarySwitch" style="margin: 0;">ç»æåå¼¹åºå­¦ä¹ æ»ç»</label>
+                    <label class="switch">
+                        <input type="checkbox" id="templateSummarySwitch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            
+            <div class="form-group" id="templatePointsSettingsGroup" style="display: none; margin-top: 15px;">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;"><i class="fas fa-gem"></i> ç§¯åè®¾ç½®ï¼æ­£æ°å åï¼è´æ°æ£åï¼</h4>
+                <div class="form-row" style="display: flex; align-items: end; gap: 15px;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="templatePointsReward">å®æå¥å± (æ­£å)</label>
+                        <div class="input-with-buttons" style="display: flex; align-items: center;">
+                            <button class="btn btn-outline-secondary" id="templateDecreaseReward" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                            <input type="text" class="form-control" id="templatePointsReward" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.max(0, parseInt(this.value) || 0);">
+                            <button class="btn btn-outline-secondary" id="templateIncreaseReward" style="padding: 5px 10px; margin-left: 5px;">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="templatePointsPenalty">æªå®ææ£å (è´å)</label>
+                        <div class="input-with-buttons" style="display: flex; align-items: center;">
+                            <button class="btn btn-outline-secondary" id="templateDecreasePenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                            <input type="text" class="form-control" id="templatePointsPenalty" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.min(0, parseInt(this.value) || 0);">
+                            <button class="btn btn-outline-secondary" id="templateIncreasePenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 15px; margin-top: 15px;">
+                    <div class="form-group" style="flex: 1; margin: 0;">
+                        <label for="templatePointsLatePenalty">é¾æå®æ (å¯æ­£è´å)</label>
+                        <div class="input-with-buttons" style="display: flex; align-items: center;">
+                            <button class="btn btn-outline-secondary" id="templateDecreaseLatePenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                            <input type="text" class="form-control" id="templatePointsLatePenalty" value="0" style="margin: 0 5px; text-align: center;">
+                            <button class="btn btn-outline-secondary" id="templateIncreaseLatePenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin: 0;">
+                        <label for="templatePointsTimeoutPenalty">è¶æ¶æ£å (è´å)</label>
+                        <div class="input-with-buttons" style="display: flex; align-items: center;">
+                            <button class="btn btn-outline-secondary" id="templateDecreaseTimeoutPenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                            <input type="text" class="form-control" id="templatePointsTimeoutPenalty" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.min(0, parseInt(this.value) || 0);">
+                            <button class="btn btn-outline-secondary" id="templateIncreaseTimeoutPenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelTemplateBtn">åæ¶</button>
+                <button class="btn btn-primary" id="saveTemplateBtn">ä¿å­ä»»å¡</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="stopTaskModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-stop-circle" style="color: #FF9800; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>ç»æä»»å¡è®¡æ¶åæ æ³ç»§ç»­è®¡æ¶</h3>
+            <p style="margin: 15px 0;">è¯·éæ©ä»»å¡å®æç¶æï¼</p>
+        </div>
+        <div class="confirmation-actions">
+    <button class="btn btn-secondary" id="stopCancelBtn">åæ¶</button>
+    <button class="btn btn-warning" id="stopNotCompleteBtn" style="background: #FF9800; color: white;">æªå®æ</button>
+    <button class="btn btn-info" id="quickCompleteBtn" style="background: #17a2b8; color: white;">æå¨å®æ</button>
+	<button class="btn btn-primary" id="stopConfirmBtn">å·²å®æ</button>
+
+</div>
+    </div>
+</div>
+
+
+<div class="modal" id="studySummaryModal" style="z-index: 3000;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>æ·»å å­¦ä¹ æ»ç»</h3>
+            <button class="close-modal" id="closeStudySummaryModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            
+            <div class="form-group">
+                <h4 style="margin-bottom: 15px; color: var(--primary);">å­¦ä¹ è¯å</h4>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    
+                    <div class="rating-item" style="width: calc(50% - 5px); margin-bottom: 15px; box-sizing: border-box; padding-right: 10px;">
+                        <label style="display: block; width: 100%; font-weight: 600; margin-bottom: 5px;">ä¸æ³¨åº¦:</label>
+                        <div class="star-rating" data-rating-type="focus">
+                            <span class="star" data-value="1"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="fas fa-star"></i></span>
+                        </div>
+                    </div>
+
+                    
+                    <div class="rating-item" style="width: calc(50% - 5px); margin-bottom: 15px; box-sizing: border-box; padding-left: 10px;">
+                        <label style="display: block; width: 100%; font-weight: 600; margin-bottom: 5px;">çç»åº¦:</label>
+                        <div class="star-rating" data-rating-type="proficiency">
+                            <span class="star" data-value="1"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="fas fa-star"></i></span>
+                        </div>
+                    </div>
+
+                    
+                    <div class="rating-item" style="width: calc(50% - 5px); margin-bottom: 15px; box-sizing: border-box; padding-right: 10px;">
+                        <label style="display: block; width: 100%; font-weight: 600; margin-bottom: 5px;">æ­£ç¡®ç:</label>
+                        <div class="star-rating" data-rating-type="accuracy">
+                            <span class="star" data-value="1"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="fas fa-star"></i></span>
+                        </div>
+                    </div>
+
+                    
+                    <div class="rating-item" style="width: calc(50% - 5px); margin-bottom: 15px; box-sizing: border-box; padding-left: 10px;">
+                        <label style="display: block; width: 100%; font-weight: 600; margin-bottom: 5px;">éåº¦:</label>
+                        <div class="star-rating" data-rating-type="speed">
+                            <span class="star" data-value="1"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="fas fa-star"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="form-group">
+                <label for="studySummaryContent" style="display: block; margin-bottom: 5px;">å­¦ä¹ æ»ç»</label>
+                
+                <div style="display: flex; justify-content: flex-start; align-items: center; gap: 15px; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 5px; flex: 1;">
+                        <label for="commonSummarySelect" style="font-size: 0.9rem; color: var(--text-light); margin: 0; min-width: 50px;">å¸¸ç¨è¯­:</label>
+                        <select id="commonSummarySelect" class="form-control" style="height: auto; min-height: 32px; font-size: 0.9rem; padding: 4px 8px; border: 1px solid #e0e0e0; border-radius: 4px; flex: 1; max-width: 300px; white-space: normal; word-wrap: break-word;">
+                            <option value="">éæ©å¸¸ç¨æ»ç»è¯­</option>
+                            
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-sm btn-secondary" id="manageCommonSummaryBtn" style="padding: 4px 10px; font-size: 0.9rem;">
+                            <i class="fas fa-cog"></i> ç®¡çå¸¸ç¨è¯­
+                        </button>
+                    </div>
+                </div>
+                <textarea id="studySummaryContent" class="form-control" rows="6" style="resize: none; max-height: 250px; overflow-y: auto;"></textarea>
+                <input type="hidden" id="currentTaskIdForSummary">
+                
+                <input type="hidden" id="summaryRatings" value="{}">
+            </div>
+
+            
+            <div class="modal" id="commonSummaryModal" style="z-index: 3500;">
+                <div class="modal-content" style="width: 500px;">
+                    <div class="modal-header">
+                        <h3>ç®¡çå¸¸ç¨æ»ç»è¯­</h3>
+                        <button class="close-modal" id="closeCommonSummaryModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="commonSummaryText">å¸¸ç¨æ»ç»è¯­</label>
+                            <textarea id="commonSummaryText" class="form-control" rows="3" style="resize: none;"></textarea>
+                            <input type="hidden" id="currentCommonSummaryId" value="">
+                        </div>
+                        <div class="form-actions" style="margin-bottom: 20px;">
+                            <button class="btn btn-primary" id="saveCommonSummaryBtn">ä¿å­</button>
+                            <button class="btn btn-secondary" id="cancelCommonSummaryBtn">åæ¶</button>
+                        </div>
+                        <h4>å¸¸ç¨æ»ç»è¯­åè¡¨</h4>
+                        <div id="commonSummaryListManager" style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelSummaryBtn">åæ¶</button>
+            <button class="btn btn-primary" id="saveSummaryBtn">ä¿å­</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="deleteModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3 id="deleteModalTitle"><i class="fas fa-trash-alt" style="color: #F44336; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3 id="deleteModalMessage">ç¡®è®¤å é¤ä»»å¡</h3>
+            <div class="single-delete-message" id="singleDeleteMessage">
+                <p>ç¡®å®è¦å é¤æ­¤ä»»å¡åï¼æ­¤æä½ä¸å¯æ¢å¤ã</p>
+            </div>
+            <div class="delete-options" id="deleteOptions">
+                <div class="delete-option">
+                    <input type="radio" name="deleteOption" id="deleteSingle" value="single" checked>
+                    <label for="deleteSingle">ä»å é¤å½åæ¥æçå­¦ä¹ è®¡å</label>
+                </div>
+                <div class="delete-option">
+                    <input type="radio" name="deleteOption" id="deleteRecurring" value="recurring">
+                    <label for="deleteRecurring">å é¤æ­¤æ¬¡åå¶æææªæ¥çéå¤è®¡å</label>
+                </div>
+            </div>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="cancelDeleteBtn">åæ¶</button>
+            <button class="btn btn-primary" id="confirmDeleteBtn">ç¡®è®¤å é¤</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="clearDataModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-exclamation-triangle" style="color: #F44336; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>ç¡®è®¤æ¸ç©ºææå­¦ä¹ è®¡åæ°æ®</h3>
+            <p style="margin: 15px 0;">æ­¤æä½å°å é¤ææå­¦ä¹ è®¡åæ°æ®ï¼ä½ä¿çåç±»åä»»å¡æ¨¡æ¿ï¼ä¸ä¸å¯æ¢å¤ï¼</p>
+
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="cancelClearBtn">åæ¶</button>
+            <button class="btn btn-primary" id="confirmClearBtn">ç¡®è®¤æ¸ç©º</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="alertModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3 id="alertTitle"><i class="fas fa-exclamation-circle" style="color: #F44336; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <p id="alertMessage" style="margin: 15px 0;"></p>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-primary" id="alertConfirmBtn">ç¡®å®</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="editScopeModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-edit" style="color: #4b6cb7; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>éæ©ç¼è¾èå´</h3>
+            <p style="margin: 15px 0;">è¯·éæ©è¦ç¼è¾çèå´ï¼</p>
+            <div class="delete-options">
+                <div class="delete-option">
+                    <input type="radio" name="editScope" id="editSingle" value="single" checked>
+                    <label for="editSingle">ä»ç¼è¾æ­¤è®¡å</label>
+                </div>
+                <div class="delete-option">
+                    <input type="radio" name="editScope" id="editRecurring" value="recurring">
+                    <label for="editRecurring">ç¼è¾æ­¤æ¬¡åææåç»­éå¤è®¡å</label>
+                </div>
+            </div>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="cancelScopeBtn">åæ¶</button>
+            <button class="btn btn-primary" id="confirmScopeBtn">ç¡®è®¤</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="focusModal">
+    <div class="focus-container">
+    <div class="focus-task-card" id="focusTaskCard">
+        
+    </div>
+</div>
+</div>
+
+
+<div class="modal" id="congratsModal">
+    <div class="congrats-content">
+        <button class="close-congrats">&times;</button>
+        <div class="congrats-icon">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <h2>ç¥è´ºä½ ï¼è§åæ§è¡å°è½æï¼</h2>
+        <p class="congrats-message">ä»æ¥ä»»å¡å·²å¨é¨å®æï¼</p>
+        <div class="stats-details">
+            <p>ä»æ¥å­¦ä¹ æ¶é´: <span id="congratsStudyTime"></span></p>
+            <p>è¿å¨æ·å¤æ¶é´: <span id="congratsSportsTime"></span></p>
+            <p>è®¡åä»»å¡æ°é: <span id="congratsTotalTasks"></span>ä¸ª</p>
+            <p>å®æç: <span id="congratsCompletionRate">100%</span></p>
+        </div>
+        <p class="backup-tip">ä¸ºé¿åæ°æ®ä¸¢å¤±ï¼å»ºè®®ä½ ç«å³å¤ä»½æ°æ®</p>
+        <button class="backup-btn" id="congratsBackupBtn">
+            <i class="fas fa-download"></i> å¤ä»½æ°æ®
+        </button>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="importConfirmModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-file-import" style="color: #4b6cb7; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>éæ©å¯¼å¥æ¹å¼</h3>
+            <p style="margin: 15px 0;">è¯·éæ©æ°æ®å¯¼å¥æ¹å¼ï¼</p>
+
+            <div class="import-options">
+                <div class="import-option">
+                    <input type="radio" id="importOverwrite" name="importOption" value="overwrite">
+                    <label for="importOverwrite">
+                        <i class="fas fa-sync-alt" style="color: #e74c3c;"></i> è¦çå¯¼å¥
+                    </label>
+                </div>
+                <div class="option-description">
+                    æ¸é¤å½åæææ°æ®ï¼åæ¬åç±»ãä»»å¡æ¨¡æ¿ãè®¡ååè®¡æ¶å¨ï¼ï¼æ¿æ¢ä¸ºæ°çæ°æ®ï¼
+                </div>
+
+                <div class="import-option">
+                    <input type="radio" id="importAppend" name="importOption" value="append" checked>
+                    <label for="importAppend">
+                        <i class="fas fa-plus-circle" style="color: #27ae60;"></i> è¿½å å¯¼å¥
+                    </label>
+                </div>
+                <div class="option-description">
+                    ä¿çå½åæ°æ®å¹¶æ·»å æ°æ°æ®ï¼éå¤æ°æ®ä¸ä¼æ·»å ï¼
+                </div>
+            </div>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="importCancelBtn">åæ¶</button>
+            <button class="btn btn-primary" id="importConfirmBtn">ç¡®è®¤å¯¼å¥</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="manualTimeModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>æå¨è®¾ç½®ä»»å¡å®éæ¶é´</h3>
+            <button class="close-modal" id="closeManualTimeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <div class="time-inputs" style="display: flex; gap: 10px; align-items: center;">
+                    <div style="flex: 1;">
+                        <label for="manualStartTime" style="font-size: 0.9rem; margin-bottom: 5px;">å¼å§æ¶é´</label>
+                        <input type="time" class="form-control" id="manualStartTime" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="manualDuration" style="font-size: 0.9rem; margin-bottom: 5px;">å®éç¨æ¶(åé)</label>
+                        <input type="number" class="form-control" id="manualDuration" min="1" max="480" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="manualEndTime" style="font-size: 0.9rem; margin-bottom: 5px;">ç»ææ¶é´</label>
+                        <input type="time" class="form-control" id="manualEndTime" required>
+                    </div>
+                </div>
+            </div>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                <p style="margin: 0; font-size: 0.9rem; color: #666;">
+                    <i class="fas fa-info-circle"></i> è¯·åå®å¥½ç»ææ¶é´ï¼å¼å§æ¶é´åå®éç¨æ¶å¯ä»¥èå¨è®¡ç®
+                </p>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelManualTimeBtn">åæ¶</button>
+            <button class="btn btn-primary" id="confirmManualTimeBtn">ç¡®å®</button>
+        </div>
+    </div>
+</div>
+
+<div class="confirmation-modal" id="confirmReplaceTimeModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-exclamation-triangle" style="color: #FF9800; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>ç¡®è®¤æ¿æ¢æ¶é´</h3>
+            <p id="replaceTimeMessage" style="margin: 15px 0;">æ¨è®¾ç½®çå®éç¨æ¶ä¼æ¿æ¢ç°æçå®éæ¶é´åå®éç¨æ¶ï¼æ¯å¦ç¡®è®¤ï¼</p>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="cancelReplaceTimeBtn">åæ¶</button>
+            <button class="btn btn-primary" id="confirmReplaceTimeBtn">ç¡®å®</button>
+        </div>
+    </div>
+</div>
+
+<div class="confirmation-modal" id="unlockedBadgeModal" style="z-index:3000;">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <div class="congrats-badge-content">
+                <div class="badge-ribbon">æ°çåç« æå°±è§£é</div>
+                <h3 class="badge-title">æ­åè·å¾ä»¥ä¸åç« </h3>
+                <div class="badge-icon-container">
+                    <div class="badge-icon-wrapper">
+                        <div class="badge-icon-bg"></div>
+                        <i class="fas fa-trophy" id="unlockedBadgeIcon"></i>
+                    </div>
+                </div>
+                <h4 class="badge-name" id="unlockedBadgeName"></h4>
+                <p class="badge-description" id="unlockedBadgeDescription"></p>
+                <div class="badge-footer">
+                    <p>å¸æä½ ç»§ç»­åªåï¼ååä½³ç»©ï¼</p>
+                </div>
+            </div>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-primary" id="closeUnlockedBadgeBtn" style="background: linear-gradient(to bottom, #4b6cb7, #3a5795); padding: 10px 25px; font-size: 1.1rem;">
+                <i class="fas fa-check-circle"></i> æ¶å¥åä¸­ï¼
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="batchPreviewModal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3>æ¹éä»»å¡é¢è§</h3>
+            <button class="close-modal" id="closePreviewModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="margin-bottom: 15px; color: #666;">è¯·ä»ç»æ ¸å¯¹ä»¥ä¸è¯å«ç»æï¼ç¡®è®¤æ è¯¯åç¹å»"ä¿å­è®¡å"</p>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #f5f7fa;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">åºå·</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">åç±»</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd; width: 15%;">ä»»å¡å</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd; width: 45%; word-break: break-word;">ä»»å¡åå®¹</th>
+                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">æä½</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewTableBody">
+                        
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions" style="margin-top: 20px;">
+                <button class="btn btn-secondary" id="closePreviewBtn">å³é­</button>
+                <button class="btn btn-primary" id="confirmBatchSaveBtn">ä¿å­è®¡å</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="badgeModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="badgeModalTitle">æ·»å æ°åç« </h3>
+            <button class="close-modal" id="closeBadgeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingBadgeId">
+            <div class="form-group">
+                <label for="badgeName" class="required">åç« åç§°</label>
+                <input type="text" class="form-control" id="badgeName" placeholder="è¾å¥åç« åç§°" required maxlength="20">
+            </div>
+            <div class="form-group">
+                <label for="badgeDescription">åç« æè¿°</label>
+                <textarea class="form-control" id="badgeDescription" rows="2" placeholder="è¾å¥åç« æè¿°"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="badgeIcon" class="required">éæ©å¾æ </label>
+                <select class="form-control" id="badgeIcon" required>
+                    <option value="fa-trophy">å¥æ¯</option>
+                    <option value="fa-medal">åç« </option>
+                    <option value="fa-star">ææ</option>
+                    <option value="fa-award">å¥é¡¹</option>
+                    <option value="fa-crown">çå </option>
+                    <option value="fa-gem">å®ç³</option>
+                    <option value="fa-heart">å¿å½¢</option>
+                    <option value="fa-fire">ç«ç°</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="badgeColor" class="required">éæ©é¢è²</label>
+                <select class="form-control" id="badgeColor" required>
+                    <option value="#FFD700">éè²</option>
+                    <option value="#CD7F32">å¤éè²</option>
+                    <option value="#4b6cb7">èè²</option>
+                    <option value="#2ecc71">ç»¿è²</option>
+                    <option value="#e74c3c">çº¢è²</option>
+                    <option value="#9b59b6">ç´«è²</option>
+                    <option value="#f39c12">æ©è²</option>
+                </select>
+            </div>
+            
+<div class="form-group">
+    <label for="badgeCondition" class="required">è§£éæ¡ä»¶</label>
+    <select class="form-control" id="badgeCondition" required>
+        <option value="totalStudyTime">æ»å­¦ä¹ æ¶é´è¾¾å°(å°æ¶)</option>
+        <option value="totalSportsTime">æ»è¿å¨æ¶é´è¾¾å°(å°æ¶)</option>
+        <option value="continuousDays">è¿ç»­å­¦ä¹ å¤©æ°è¾¾å°</option>
+        <option value="totalTasksCompleted">å®æä»»å¡æ»æ°è¾¾å°</option>
+        <option value="dailyTasksCompleted">åæ¥å®æä»»å¡æ°è¾¾å°</option>
+        <option value="categoryMastery">æä¸ªåç±»ç²¾é(å°æ¶)</option>
+        <option value="categoryTasksCompleted">æä¸ªåç±»å®æä»»å¡æ°è¾¾å°</option>
+        <option value="specificTaskCompleted">ç¹å®ä»»å¡å®ææ¬¡æ°è¾¾å°</option>
+        <option value="weeklyStudyGoal">å¨å­¦ä¹ ç®æ è¾¾ææ¬¡æ°</option>
+		<option value="dailyCompletionRate">ï¼éå¤ï¼åæ¥ä»»å¡å®æçè¾¾æ </option>
+    <option value="dailyStudyTime">ï¼éå¤ï¼åæ¥å­¦ä¹ æ¶é´è¾¾å°(å°æ¶)</option>
+	<option value="dailySpecificTaskTime">ï¼éå¤ï¼åæ¥ç¹å®ä»»å¡æ¶é´è¾¾å°(åé)</option>
+    <option value="weeklySpecificTaskCount">ï¼éå¤ï¼åå¨ç¹å®ä»»å¡è¾¾ææ¬¡æ°</option>
+    <option value="monthlyTaskCount">ï¼éå¤ï¼åæå®æä»»å¡æ°è¾¾å°</option>
+    <option value="monthlyStudyTime">ï¼éå¤ï¼åæå­¦ä¹ æ¶é¿è¾¾å°</option>
+    </select>
+</div>
+            <div class="form-group" id="badgeConditionValueGroup">
+                <label for="badgeConditionValue" class="required">æ¡ä»¶å¼</label>
+                <input type="number" class="form-control" id="badgeConditionValue" placeholder="è¾å¥æ¡ä»¶å¼" required min="1">
+            </div>
+            <div class="form-group" id="badgeCategoryGroup" style="display: none;">
+    <label for="badgeCategory" class="required">éæ©åç±»</label>
+    <select class="form-control" id="badgeCategory">
+        
+    </select>
+</div>
+
+<div class="form-group" id="badgeTaskGroup" style="display: none;">
+    <label for="badgeTask" class="required">éæ©ä»»å¡</label>
+    <select class="form-control" id="badgeTask">
+        
+    </select>
+</div>
+            <div class="form-actions">
+    <button class="btn btn-secondary" id="cancelBadgeBtn">åæ¶</button>
+    <button class="btn btn-danger" id="deleteBadgeBtn" style="display: none;">å é¤åç« </button>
+    <button class="btn btn-primary" id="saveBadgeBtn">ä¿å­åç« </button>
+</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="batchBadgeModal">
+    <div class="modal-content" style="max-width: 1000px;">
+        <div class="modal-header">
+            <h3>æ¹éæ·»å åç« </h3>
+            <button class="close-modal" id="closeBatchBadgeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <button class="btn btn-primary" id="addBatchBadgeRowBtn" style="padding: 8px 15px;">
+                    <i class="fas fa-plus"></i> æ·»å ä¸è¡
+                </button>
+                <span style="color: #666; font-size: 0.9rem;">ä¸è¡ä¸æåç« ï¼ç¹å»æé®æ·»å æ°çä¸è¡</span>
+            </div>
+            <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">åç« åç§°</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">æè¿°</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">å¾æ </th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">é¢è²</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">è§£éæ¡ä»¶</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">æ¡ä»¶å¼</th>
+                            <th style="padding: 12px; text-align: center; border-bottom: 1px solid #e9ecef; font-weight: 600;">æä½</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchBadgeTableBody">
+                        
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-secondary" id="cancelBatchBadgeBtn" style="padding: 10px 20px;">åæ¶</button>
+                <button class="btn btn-primary" id="saveBatchBadgeBtn" style="padding: 10px 20px;">ä¿å­ææåç« </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="scorePreviewModal">
+  <div class="modal-content" style="max-width:800px;">
+    <div class="modal-header">
+      <h3>æç»©è¯¦æ</h3>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="btn btn-sm btn-outline-primary" id="btnPreviewEdit" title="ç¼è¾">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger"  id="btnPreviewDel"  title="å é¤">
+          <i class="fas fa-trash"></i>
+        </button>
+        <button class="btn btn-sm btn-secondary"      id="btnPreviewClose">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" id="scorePreviewBody">
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="scoreModal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3 id="scoreModalTitle">æ·»å èè¯æç»©</h3>
+            <button class="close-modal" id="closeScoreModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingScoreId">
+
+            
+            <div class="form-group">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+                    <i class="fas fa-info-circle"></i> åºç¡ä¿¡æ¯
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+    <div style="position: relative;">
+        <label for="scoreYear" class="required">å­¦å¹´</label>
+        <input type="text" class="form-control" id="scoreYear" placeholder="è¾å¥æéæ©å­¦å¹´ï¼å¦ï¼2025" required autocomplete="off">
+        <div id="scoreYearDropdown" class="custom-dropdown" style="display: none;">
+            
+        </div>
+    </div>
+    <div style="position: relative;">
+        <label for="scoreGrade" class="required">å¹´çº§</label>
+        <input type="text" class="form-control" id="scoreGrade" placeholder="è¾å¥æéæ©å¹´çº§ï¼å¦ï¼ä¸å¹´çº§" required autocomplete="off">
+        <div id="scoreGradeDropdown" class="custom-dropdown" style="display: none;">
+            
+        </div>
+    </div>
+    <div style="position: relative;">
+        <label for="scoreSemester" class="required">å­¦æ</label>
+        <input type="text" class="form-control" id="scoreSemester" placeholder="è¾å¥æéæ©å­¦æï¼å¦ï¼ä¸å­¦æ" required autocomplete="off">
+        <div id="scoreSemesterDropdown" class="custom-dropdown" style="display: none;">
+            
+        </div>
+    </div>
+</div>
+            </div>
+
+            
+            <div class="form-group">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+                    <i class="fas fa-file-alt"></i> èè¯ä¿¡æ¯
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label for="examDate" class="required">èè¯æ¥æ</label>
+                        <input type="date" class="form-control" id="examDate" required>
+                    </div>
+                    <div>
+                        <label for="examName" class="required">èè¯åç§°</label>
+                        <input type="text" class="form-control" id="examName" placeholder="å¦ï¼ç¬¬ä¸ååæµè¯" required>
+                    </div>
+                  <div style="position: relative;">
+    <label for="examType" class="required">èè¯ç±»å</label>
+    <input type="text" class="form-control" id="examType" placeholder="è¾å¥æéæ©èè¯ç±»åï¼å¦ï¼ååæµè¯" required autocomplete="off">
+    <div id="examTypeDropdown" class="custom-dropdown" style="display: none;">
+        
+    </div>
+</div>
+                </div>
+            </div>
+
+            
+            <div class="form-group">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+                    <i class="fas fa-graduation-cap"></i> æç»©ä¿¡æ¯
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                  <div>
+    <label for="scoreSubject" class="required">ç§ç®</label>
+    <div style="display:flex;gap:6px;align-items:center;">
+        <select class="form-control" id="scoreSubject" required style="flex:1;">
+            
+        </select>
+                <button type="button" class="btn btn-primary" id="addCategoryFromScoreBtn"
+                style="height:36px;width:36px;padding:0;font-size:1.2rem;"
+                title="æ°å¢åç±»"
+                onclick="event.stopPropagation()">
+            +
+        </button>
+    </div>
+</div>
+                    <div>
+                        <label for="scoreTotal">æ»å</label>
+                        <input type="number" class="form-control" id="scoreTotal" placeholder="å¦ï¼100">
+                    </div>
+                </div>
+               <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: 15px;">
+    <div>
+        <label for="scoreTarget">ç®æ å</label>
+        <input type="number" class="form-control" id="scoreTarget" placeholder="ææåæ°">
+    </div>
+    <div>
+        <label for="scoreActual" class="required">å¾å</label>
+        <input type="number" class="form-control" id="scoreActual" placeholder="å®éåæ°" required>
+    </div>
+    <div>
+        <label for="scoreAverage">å¹³åå</label>
+        <input type="number" class="form-control" id="scoreAverage" placeholder="ç­çº§å¹³åå">
+    </div>
+    <div>
+        <label for="scoreMax">æé«å</label>
+        <input type="number" class="form-control" id="scoreMax" placeholder="ç­çº§æé«å">
+    </div>
+    <div>
+        <label for="scoreMedian">ä¸­ä½æ°</label>
+        <input type="number" class="form-control" id="scoreMedian" placeholder="ç­çº§ä¸­ä½æ°">
+    </div>
+    
+    <div>
+        <label for="scorePerformance">èè¯è¡¨ç°</label>
+        <select class="form-control" id="scorePerformance">
+            <option value="">è¯·éæ©</option>
+            <option value="å­¦ç¥">å­¦ç¥</option>
+            <option value="å®ç¾">å®ç¾</option>
+            <option value="ä¼ç§">ä¼ç§</option>
+            <option value="è¯å¥½">è¯å¥½</option>
+            <option value="ä¸è¬">ä¸è¬</option>
+            <option value="å¾æé«">å¾æé«</option>
+            <option value="åæ ¼">åæ ¼</option>
+            <option value="å·®">å·®</option>
+            <option value="æå·®">æå·®</option>
+        </select>
+    </div>
+</div>
+            </div>
+
+            
+            <div class="form-group">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+                    <i class="fas fa-trophy"></i> æåä¿¡æ¯
+                </h4>
+                <div id="rankingsContainer">
+                  <div class="ranking-item" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
+    <div style="position: relative;">
+        <label>æåç±»å</label>
+        <input type="text" class="form-control ranking-type" placeholder="è¾å¥æéæ©æåç±»åï¼å¦ï¼ç­çº§æå">
+        <div class="custom-dropdown" style="display: none;">
+            <div class="dropdown-item">ç­çº§æå</div>
+            <div class="dropdown-item">å¹´çº§æå</div>
+            <div class="dropdown-item">å¨æ ¡æå</div>
+            <div class="dropdown-item">åºæå</div>
+            <div class="dropdown-item">å¸æå</div>
+            <div class="dropdown-item">çæå</div>
+            <div class="dropdown-item">å¨å½æå</div>
+        </div>
+    </div>
+    <div>
+        <label>åæ¬¡</label>
+        <input type="number" class="form-control ranking-position" placeholder="å¦ï¼5">
+    </div>
+</div>
+                </div>
+                <button type="button" class="btn btn-secondary" id="addRankingBtn" style="margin-top: 10px;">
+    <i class="fas fa-plus"></i> æ·»å æå
+</button>
+
+
+<template id="rankingRowTemplate">
+  <div class="ranking-item" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px">
+      <div style="position: relative;">
+          <label>æåç±»å</label>
+          <input type="text" class="form-control ranking-type" placeholder="è¾å¥æéæ©æåç±»åï¼å¦ï¼ç­çº§æå">
+          <div class="custom-dropdown" style="display: none;">
+              <div class="dropdown-item">ç­çº§æå</div>
+              <div class="dropdown-item">å¹´çº§æå</div>
+              <div class="dropdown-item">å¨æ ¡æå</div>
+              <div class="dropdown-item">åºæå</div>
+              <div class="dropdown-item">å¸æå</div>
+              <div class="dropdown-item">çæå</div>
+              <div class="dropdown-item">å¨å½æå</div>
+          </div>
+      </div>
+      <div>
+          <label>åæ¬¡</label>
+          <input type="number" class="form-control ranking-position" placeholder="å¦ï¼5">
+      </div>
+      <div>
+          <button type="button" class="btn btn-outline-danger btn-sm remove-ranking-btn" style="margin-top:24px">
+              <i class="fas fa-trash"></i>
+          </button>
+      </div>
+  </div>
+</template>
+            </div>
+
+            
+         <div class="form-group">
+    <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+        <i class="fas fa-exclamation-triangle"></i> èå¼±æ»ç»
+    </h4>
+    <div id="weaknessContainer"></div>
+    <button type="button" class="btn btn-secondary" id="addWeaknessBtn" style="margin-top: 10px;">
+        <i class="fas fa-plus"></i> æ·»å èå¼±é¡¹
+    </button>
+</div>
+
+
+<div id="weaknessTemplate" style="display: none;">
+    <div class="weakness-item" style="margin-bottom: 10px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: end;">
+            <div style="position: relative;">
+                <label>é¢å</label>
+                <input type="text" class="form-control weakness-question-type" placeholder="è¾å¥æéæ©é¢å">
+                <div class="custom-dropdown" style="display: none;">
+                    <div class="dropdown-item">éæ©é¢</div>
+                    <div class="dropdown-item">å¡«ç©ºé¢</div>
+                    <div class="dropdown-item">è§£ç­é¢</div>
+                    <div class="dropdown-item">è®¡ç®é¢</div>
+                    <div class="dropdown-item">è¯æé¢</div>
+                    <div class="dropdown-item">åºç¨é¢</div>
+                </div>
+            </div>
+            <div style="position: relative;">
+                <label>ç¥è¯ç¹</label>
+                <input type="text" class="form-control weakness-knowledge-point" placeholder="è¾å¥æéæ©ç¥è¯ç¹">
+                <div class="custom-dropdown" style="display: none;">
+                    <div class="dropdown-item">æ¼é³</div>
+                    <div class="dropdown-item">è¯å­</div>
+                    <div class="dropdown-item">è®¡ç®</div>
+                    <div class="dropdown-item">å½æ°</div>
+                    <div class="dropdown-item">å ä½</div>
+                    <div class="dropdown-item">ä»£æ°</div>
+                    <div class="dropdown-item">æ¦çç»è®¡</div>
+                    <div class="dropdown-item">æ°å</div>
+                </div>
+            </div>
+            <div>
+                <label>åå¼</label>
+                <input type="number" class="form-control weakness-score-total" placeholder="åå¼" min="0" step="0.5">
+            </div>
+            <div>
+                <label>å¾å</label>
+                <input type="number" class="form-control weakness-score-actual" placeholder="å¾å" min="0" step="0.5">
+            </div>
+            <div>
+                <label>ä¸¢åç</label>
+                <input type="text" class="form-control weakness-loss-rate" placeholder="ä¸¢åç" readonly>
+            </div>
+            <div>
+                <button type="button" class="btn btn-danger remove-weakness-btn" style="margin-top: 24px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 10px;">
+            <label>æ»ç»</label>
+            <textarea class="form-control weakness-summary" placeholder="æ»ç»" rows="3" style="resize: vertical;"></textarea>
+        </div>
+    </div>
+</div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelScoreBtn">åæ¶</button>
+                <button class="btn btn-primary" id="saveScoreBtn">ä¿å­æç»©</button>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+ <div class="modal" id="cardVisibilityModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-cog"></i> ç»è®¡å¡çæ¾ç¤ºåéèè®¾ç½®</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="visibility-options">
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleStudyTime" checked>
+                    <label for="toggleStudyTime">ä»æ¥å­¦ä¹ æ¶é´</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleSportsTime" checked>
+                    <label for="toggleSportsTime">è¿å¨æ·å¤æ¶é´</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleTaskCount" checked>
+                    <label for="toggleTaskCount">ä»æ¥ä»»å¡æ°é</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleCompletionRate" checked>
+                    <label for="toggleCompletionRate">ä»æ¥å®æè¿åº¦</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleStatsChart" checked>
+                    <label for="toggleStatsChart">ç»è®¡å¾è¡¨æ±æ»</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleBadgeWall" checked>
+                    <label for="toggleBadgeWall">è£èªåç« å±ç¤º</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleScoreStats" checked>
+                    <label for="toggleScoreStats">æç»©ç»è®¡è¿½è¸ª</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="togglePointsExchange" checked>
+                    <label for="togglePointsExchange">ç§¯åå¥å±åå</label>
+                </div>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancelCardVisibility">åæ¶</button>
+            <button class="btn btn-primary" id="saveCardVisibility">ä¿å­</button>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal" id="parentPasswordModal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-key"></i>å®¶é¿å¯ç è®¾ç½®</h3>
+            <button class="close-modal" id="closeParentPasswordModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="parentPasswordInput">è®¾ç½®å®¶é¿å¯ç ï¼</label>
+                <input type="password" id="parentPasswordInput" class="form-control" placeholder="è¯·è¾å¥ 4-8 ä½æ°å­æå­æ¯ä½ä¸ºå®¶é¿å¯ç ">
+            </div>
+            <div class="form-group">
+                <label for="confirmParentPasswordInput">ç¡®è®¤å®¶é¿å¯ç ï¼</label>
+                <input type="password" id="confirmParentPasswordInput" class="form-control" placeholder="è¯·åæ¬¡è¾å¥å®¶é¿å¯ç ">
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h4 style="margin-bottom: 15px; color: var(--primary);">æä½æéè®¾ç½®</h4>
+                <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 15px;">å¼å¯ä»¥ä¸å¼å³åï¼å¯¹åºæä½å°éè¦éªè¯å®¶é¿å¯ç ï¼</p>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">å é¤åå²æªå®æä»»å¡</div>
+                    <label class="switch">
+                        <input type="checkbox" id="deleteHistoricalTaskSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">å é¤ä»»å¡</div>
+                    <label class="switch">
+                        <input type="checkbox" id="deleteTaskSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">ç¼è¾ä»»å¡</div>
+                    <label class="switch">
+                        <input type="checkbox" id="editTaskSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">æ·»å åç« </div>
+                    <label class="switch">
+                        <input type="checkbox" id="addBadgeSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">ç¼è¾åç« </div>
+                    <label class="switch">
+                        <input type="checkbox" id="editBadgeSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+
+                <div class="password-control-item">
+                    <div class="password-control-label">å é¤åç« </div>
+                    <label class="switch">
+                        <input type="checkbox" id="deleteBadgeSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">æ¸ç©ºåç« </div>
+                    <label class="switch">
+                        <input type="checkbox" id="clearBadgesSwitch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">æ¸ç©ºå­¦ä¹ è®¡å</div>
+                    <label class="switch">
+                        <input type="checkbox" id="clearStudyPlanSwitch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">æ·»å å¥å±</div>
+                    <label class="switch">
+                        <input type="checkbox" id="addRewardSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">ç¼è¾å¥å±</div>
+                    <label class="switch">
+                        <input type="checkbox" id="editRewardSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">å é¤å¥å±</div>
+                    <label class="switch">
+                        <input type="checkbox" id="deleteRewardSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>    <div class="password-control-item">
+                    <div class="password-control-label">æ¸ç©ºç§¯åè®°å½</div>
+                    <label class="switch">
+                        <input type="checkbox" id="clearPointsRecordsSwitch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelParentPasswordBtn">åæ¶</button>
+            <button class="btn btn-primary" id="saveParentPasswordBtn">ä¿å­è®¾ç½®</button>
+        </div>
+    </div>
+</div>
+
+<script src="script1.js"></script>
+<audio id="successSound" preload="auto">
+    <source src="success.wav" type="audio/wav">
+    æ¨çæµè§å¨ä¸æ¯æé³é¢æ­æ¾ã
+</audio>
+</body>
+</html>
+

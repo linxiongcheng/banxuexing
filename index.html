@@ -1,0 +1,2264 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>伴学星 - 每天进步一点点</title>
+<script src="chart.min.js"></script>
+<script src="chartjs-plugin-datalabels.min.js"></script>
+    <link rel="stylesheet" href="vendor/fontawesome/css/all.min.css">
+	<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="theme-switcher.css">
+</head>
+<body>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p style="margin-top: 20px; font-weight: 600; color: #4b6cb7;">加载中，请稍候...</p>
+    </div>
+
+    <div class="container">
+      <header>
+  <div class="header-content">
+    <div class="header-left">
+      <div class="title-container">
+        伴学星--每天进步一点点
+      </div>
+      <p id="subTitle" style="margin: 5px 0 0 0; font-size: 0.9rem; color: rgba(255, 255, 255, 0.8);">已连续打卡<span id="subDays">0</span>天，累计完成<span id="subTasks">0</span>个学习计划，继续加油！</p>
+    </div>
+    <div class="header-right">
+      <div class="account-controls">
+        <button class="account-trigger" id="accountTrigger">
+          <span id="currentAccountName">安安</span>
+          <i class="fas fa-chevron-down"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+
+<ul class="account-menu" id="accountMenu"></ul>
+<div id="themeControlsHost" style="display:none;">
+  <div class="theme-controls" id="themeControls">
+    <label for="themeSelect"><i class="fas fa-palette"></i> 主题</label>
+    <select id="themeSelect" aria-label="选择页面主题">
+      <option value="classic">经典蓝</option>
+      <option value="ocean">海洋青</option>
+      <option value="forest">森林绿</option>
+      <option value="sunset">日落橙</option>
+    </select>
+  </div>
+</div>
+
+        <div class="today-stats">
+            <div class="stat-card" id="todayStudyTimeCard">
+			<p>今日学习时长</p>
+                <h3 id="todayStudyTime">0.0h</h3>
+            </div>
+            <div class="stat-card" id="sportsTimeCard">
+			 <p>今日运动时长</p>
+                <h3 id="sportsTime">0.0h</h3>
+            </div>
+
+            <div class="stat-card" id="completedTasksCard">
+			 <p>任务完成数</p>
+                <h3 id="completedTasks">0/0</h3>  
+            </div>
+
+            <div class="stat-card" id="completionRateCard">
+			 <p>今日任务完成率</p>
+                <h3 id="completionRate">0%</h3>
+            </div>
+            <div class="stat-card" id="statsCard">
+			 <p>图表统计</p>
+                <h3><i class="fas fa-chart-column" data-fallback="图"></i></h3>
+            </div>
+			<div class="stat-card" id="badgeWallCard">
+    <p>成就徽章墙</p>
+    <h3><i class="fas fa-award" data-fallback="勋"></i></h3>
+</div>
+<div class="stat-card" id="scoreStatsCard">
+    <p>成绩统计分析</p>
+    <h3><i class="fas fa-chart-line" data-fallback="绩"></i></h3>
+</div>
+<div class="stat-card" id="pointsCard">
+        <p>积分兑换站</p>
+        <h3 id="pointsDisplayValue">0</h3>
+    </div>
+        </div>
+
+        <div id="home-page">
+            <div class="main-content">
+                <div class="sidebar collapsed" id="sidebar">
+                    
+<div class="sidebar-header">
+    <h2 id="sidebarTitle"><i class="fas fa-list" data-fallback="类"></i> 计划模版管理</h2>
+    <button class="add-category-btn" id="addCategoryBtn">+</button>
+</div>
+
+                    <ul class="category-list" id="categoryList">
+                        
+                    </ul>
+                </div>
+
+                <div class="tasks-container" id="tasksContainer">
+                    <div class="tasks-header-container">
+                        
+                                    <div class="header-row">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <h2 style="margin: 0;"><i class="fas fa-tasks" data-fallback="任"></i> 学习计划</h2>
+                
+                <div class="sort-container" style="position: relative; display: inline-block;">
+                    <button class="sort-btn" id="sortBtn" style="background: #6c757d; border: none; border-radius: 6px; padding: 6px 10px; color: white; cursor: pointer; font-size: 0.9rem;">
+                        <i class="fas fa-sort" data-fallback="排"></i>
+                    </button>
+                  <div id="sortDropdown" class="sort-dropdown" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 6px; background: #fff; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,.15); padding: 8px; min-width: 180px; z-index: 1000; flex-direction: column; gap: 6px;">
+    <div class="sort-option" data-sort="time"   style="display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:15px;color:#333;border-radius:8px;cursor:pointer;transition:background .2s;"><i class="fas fa-clock"        style="color:#4b6cb7;width:18px;text-align:center;"></i>按计划时间</div>
+    <div class="sort-option" data-sort="actual" style="display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:15px;color:#333;border-radius:8px;cursor:pointer;transition:background .2s;"><i class="fas fa-hourglass-half" style="color:#4b6cb7;width:18px;text-align:center;"></i>按实际时间</div>
+    <div class="sort-option" data-sort="category" style="display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:15px;color:#333;border-radius:8px;cursor:pointer;transition:background .2s;"><i class="fas fa-layer-group"  style="color:#4b6cb7;width:18px;text-align:center;"></i>按分类名称</div>
+    <div class="sort-option" data-sort="custom"  style="display:flex;align-items:center;gap:10px;padding:10px 12px;font-size:15px;color:#333;border-radius:8px;cursor:pointer;transition:background .2s;"><i class="fas fa-hand-pointer" style="color:#4b6cb7;width:18px;text-align:center;"></i>自定义排序</div>
+</div>
+                </div>
+            </div>
+            <div class="action-buttons-container">
+                <button class="add-task-main-btn" id="addBatchTaskBtn" style="background: #5bc0de;">
+                    <i class="fas fa-list" data-fallback="批"></i> 批量添加
+                </button>
+                <button class="add-task-main-btn" id="addTaskBtn">
+                    <i class="fas fa-plus" data-fallback="+"></i> 添加计划
+                </button>
+            </div>
+        </div>
+
+                        
+                        <div class="date-row">
+                            <div class="date-info">
+                                <div class="current-date-display" id="currentDateDisplay">2023年7月第1周</div>
+                                <div class="week-controls">
+                                    <div class="week-toggle">
+
+                                    </div>
+                                </div>
+                            </div>
+ 
+            <div class="overdue-toggle" style="display: flex; align-items: center; margin-right: 15px;">
+                <input type="checkbox" id="showOverdueTasks">
+                <label for="showOverdueTasks" style="margin-left: 5px; font-size: 0.9rem;">逾期任务</label>
+            </div>
+            <div class="date-controls">
+                <button class="nav-btn" id="prevBtn">
+                    <i class="fas fa-chevron-left" data-fallback="<"></i>
+                </button>
+                <button class="today-btn" id="todayBtn">
+                     今天
+                </button>
+                <button class="nav-btn" id="nextBtn">
+                    <i class="fas fa-chevron-right" data-fallback=">"></i>
+                </button>
+                <button class="calendar-toggle" id="calendarBtn">
+                    <i class="fas fa-calendar-alt" data-fallback="月"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+    <div class="week-days-container" id="weekViewContainer">
+        <div class="week-days" id="weekDays">
+            
+        </div>
+    </div>
+
+    <div class="task-list-main" id="taskListMain">
+        
+    </div>
+</div>
+</div>
+</div>
+
+
+<div class="stats-page" id="statsPage">
+    <div class="stats-header">
+        <h2><i class="fas fa-chart-bar" data-fallback="统"></i> 学习数据统计</h2>
+        <button class="back-btn" id="backToHome">
+            <i class="fas fa-arrow-left" data-fallback="返"></i> 返回计划
+        </button>
+    </div>
+
+                
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="display: inline-block; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    <label style="margin-right: 10px; font-weight: bold;">选择日期范围：</label>
+                    <input type="date" id="statsStartDate" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px; margin-right: 10px;">
+                    <span style="margin-right: 10px;">至</span>
+                    <input type="date" id="statsEndDate" style="padding: 8px; border: 1px solid #ddd; border-radius: 5px;">
+                    <button id="statsFilterBtn" style="margin-left: 10px; padding: 8px 15px; background: #4b6cb7; color: white; border: none; border-radius: 5px; cursor: pointer;">筛选</button>
+                </div>
+            </div>
+
+            
+            <div class="stats-grid">
+                <div class="stat-chart">
+                    <h3>每日计划完成情况</h3>
+                    <div class="chart-container">
+                        <canvas id="dailyTasksChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-chart">
+                    <h3>每日学习时间 VS 运动时间 VS 娱乐时间</h3>
+                    <div class="chart-container">
+                        <canvas id="dailyTimeChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-chart">
+                    <h3>各分类总用时占比</h3>
+                    <div class="chart-container">
+                        <canvas id="categoryPieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="stat-chart">
+                    <h3>各分类每日用时对比</h3>
+                    <div class="chart-container">
+                        <canvas id="categoryDailyChart"></canvas>
+                    </div>
+                </div>
+				
+<div class="stat-chart">
+  <h3 style="display:flex;justify-content:space-between;align-items:center;">
+    计划用时 vs 实际用时
+    <select id="planActualMode" style="font-size:0.9rem;padding:4px 8px;border-radius:4px;border:1px solid #ddd;">
+      <option value="category">按科目</option>
+      <option value="task">按任务</option>
+    </select>
+  </h3>
+  <div class="chart-container">
+    <canvas id="planActualChart"></canvas>
+  </div>
+</div>
+
+<div class="stat-chart">
+    <h3>任务完成类型分布</h3>
+    <div class="chart-container">
+        <canvas id="completionTypeChart"></canvas>
+    </div>
+</div>
+            </div>
+</div>
+
+<div class="stats-page" id="badgePage" style="display: none;">
+    <div class="stats-header">
+        <h2>
+  <i class="fas fa-trophy" data-fallback="勋"></i> 勋章墙
+  <span id="badgeCount" style="
+ margin-left: 12px;
+ padding: 2px 10px;
+ font-size: 0.7em;
+ background: linear-gradient(135deg, #fff9c4 0%, #ffd700 100%);
+ color: #b8860b;
+ border-radius: 12px;
+ box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+ font-weight: 600;
+ letter-spacing: 0.5px;
+">
+</h2>
+        <button class="back-btn" id="backToHomeFromBadge">
+            <i class="fas fa-arrow-left" data-fallback="返"></i> 返回计划
+        </button>
+    </div>
+
+    <div class="badge-controls">
+    <button class="add-task-main-btn" id="addBadgeBtn" style="background: #4b6cb7;">
+        <i class="fas fa-plus" data-fallback="添"></i> 添加勋章
+    </button>
+    <button class="add-task-main-btn" id="addBatchBadgeBtn" style="background: #28a745;">
+        <i class="fas fa-list" data-fallback="批"></i> 批量添加勋章
+    </button>
+    <button class="btn btn-danger" id="clearAllBadgeBtn">
+        <i class="fas fa-trash"></i> 清空勋章
+    </button>
+</div>
+
+    <div class="badge-grid" id="badgeGrid">
+        
+    </div>
+</div>
+
+<div class="stats-page" id="scorePage" style="display: none;">
+    <div class="stats-header">
+        <h2><i class="fas fa-chart-line" data-fallback="绩"></i> 成绩统计追踪</h2>
+        <button class="back-btn" id="backToHomeFromScore">
+            <i class="fas fa-arrow-left" data-fallback="返"></i> 返回计划
+        </button>
+    </div>
+
+    <div class="score-controls">
+        <button class="add-task-main-btn" id="addScoreBtn" style="background: #4b6cb7;">
+            <i class="fas fa-plus" data-fallback="添"></i> 添加成绩
+        </button>
+        <button class="add-task-main-btn" id="scoreAnalysisBtn" style="background: #28a745;">
+            <i class="fas fa-chart-bar" data-fallback="析"></i> 成绩分析
+        </button>
+    </div>
+
+<div class="score-filters" style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px; padding: 10px; background-color: var(--card-bg, #f8f9fa); border-radius: 8px;">
+    <div style="display: flex; align-items: center; gap: 5px;">
+        <label for="filterYear">学年:</label>
+        <select id="filterYear" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="">全部</option>
+            
+        </select>
+    </div>
+    <div style="display: flex; align-items: center; gap: 5px;">
+        <label for="filterGrade">年级:</label>
+        <select id="filterGrade" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="">全部</option>
+            
+        </select>
+    </div>
+    <div style="display: flex; align-items: center; gap: 5px;">
+        <label for="filterSemester">学期:</label>
+        <select id="filterSemester" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="">全部</option>
+            
+        </select>
+    </div>
+    <div style="display: flex; align-items: center; gap: 5px;">
+        <label for="filterSubject">科目:</label>
+        <select id="filterSubject" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+            <option value="">全部</option>
+            
+        </select>
+        
+        <button id="resetScoreFilters" style="padding: 5px 10px; margin-left: 5px;">重置</button>
+    </div>
+</div>
+
+    <div class="score-cards-container" id="scoreCardsContainer">
+        
+    </div>
+</div>
+
+<div class="stats-page" id="scoreAnalysisPage" style="display: none;">
+    <div class="stats-header">
+        <h2><i class="fas fa-chart-bar" data-fallback="析"></i> 成绩分析</h2>
+        <button class="back-btn" id="backToScoreFromAnalysis">
+            <i class="fas fa-arrow-left" data-fallback="返"></i> 返回成绩列表
+        </button>
+    </div>
+
+    <div class="score-analysis-filters" style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px; padding: 10px; background-color: var(--card-bg, #f8f9fa); border-radius: 8px;">
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <label for="analysisStartDate">开始日期:</label>
+            <input type="date" id="analysisStartDate" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <label for="analysisEndDate">结束日期:</label>
+            <input type="date" id="analysisEndDate" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+        </div>
+        <button id="applyAnalysisDateFilter" style="padding: 6px 12px; margin-left: 5px; background-color: var(--primary, #007bff); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">筛选</button>
+        <button id="resetAnalysisDateFilter" style="padding: 6px 12px; margin-left: 5px; background-color: var(--secondary, #6c757d); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">重置</button>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-chart">
+            <h3>各科目成绩趋势</h3>
+            <div class="chart-container">
+                <canvas id="scoreTrendChart"></canvas>
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>各科目平均得分率 </h3> 
+            <div class="chart-container">
+                <canvas id="subjectComparisonChart"></canvas>
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>目标与实际成绩差距图</h3>
+            <div class="chart-container">
+                <canvas id="targetActualChart"></canvas>
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>排名变化趋势</h3>
+            <div class="chart-container">
+                <canvas id="rankingTrendChart"></canvas>
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>成绩位置直方图</h3> 
+            <div class="chart-container">
+                <canvas id="examTypeChart"></canvas> 
+            </div>
+        </div>
+        <div class="stat-chart">
+            <h3>薄弱环节分析</h3> 
+            <div class="chart-container">
+                <canvas id="scorePerformanceChart"></canvas> 
+            </div>
+        </div>
+		<div class="stat-chart">
+    <h3><i class="fas fa-chart-pie" data-fallback="饼"></i> 考试表现分析</h3>
+    <div class="chart-container">
+        <canvas id="performancePieChart"></canvas>
+    </div>
+</div>
+    </div>
+</div>
+
+<div class="stats-page" id="pointsExchangePage" style="display: none;">
+    <div class="stats-header">
+        <h2><i class="fas fa-gem"></i> 积分奖励兑换</h2>
+        <button class="back-btn" id="backToHomeFromPointsExchange"><i class="fas fa-arrow-left"></i> 返回计划</button>
+    </div>
+    <div class="points-exchange-content">
+        <div class="tabs">
+		 <button class="tab-btn active" data-tab="rewards">奖励池</button>
+            <button class="tab-btn" data-tab="records">积分记录</button>
+
+        </div>
+       <div class="tab-content" id="recordsTab">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3>积分记录</h3>
+        <button class="btn btn-danger" id="clearPointsRecordsBtn">
+            <i class="fas fa-trash-alt"></i> 清空积分记录
+        </button>
+    </div>
+    <table class="points-records-table">
+        <thead>
+            <tr>
+                <th>任务所属日期</th>
+                <th>操作时间</th>
+                <th>任务名称</th>
+                <th>打卡结果</th>
+                <th>积分变动</th>
+                <th>余额</th>
+            </tr>
+        </thead>
+        <tbody id="pointsRecordsTableBody">
+            
+        </tbody>
+    </table>
+	
+            <div id="pointsRecordsPagination" class="pagination-container" style="display: none; margin-top: 15px; justify-content: center; align-items: center; gap: 5px;">
+                
+            </div>
+</div>
+        <div class="tab-content active" id="rewardsTab">
+            <div class="rewards-header">
+                <button class="add-task-main-btn" id="addRewardBtn"><i class="fas fa-plus"></i> 添加奖励</button>
+            </div>
+            <div class="rewards-grid" id="rewardsGrid">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="rewardModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="rewardModalTitle">添加新奖励</h3>
+            <button class="close-modal" id="closeRewardModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingRewardId">
+            <div class="form-group">
+                <label for="rewardName" class="required">奖励名称</label>
+                <input type="text" class="form-control" id="rewardName" placeholder="输入奖励名称" required maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="rewardDescription">奖励内容</label>
+                <textarea class="form-control" id="rewardDescription" rows="3" placeholder="描述奖励内容"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="rewardPointsRequired" class="required">所需积分</label>
+                <input type="number" class="form-control" id="rewardPointsRequired" placeholder="所需积分" required min="1">
+            </div>
+			
+<div class="form-group">
+    <label for="rewardQuantity" class="required">可兑换数量</label>
+    <input type="number" class="form-control" id="rewardQuantity" placeholder="可兑换次数 (0为无限)" required min="0" value="1">
+</div>
+
+       <div class="form-group">
+    <label for="rewardIcon">奖品图标</label>
+    <div class="icon-selection-container" id="rewardIconSelection">
+        <div class="icon-option" data-icon="fa-gift">
+            <i class="fas fa-gift"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-star">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-trophy">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-heart">
+            <i class="fas fa-heart"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-smile">
+            <i class="fas fa-smile"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-candy-cane">
+            <i class="fas fa-candy-cane"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-gamepad">
+            <i class="fas fa-gamepad"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-film">
+            <i class="fas fa-film"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-music">
+            <i class="fas fa-music"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-book">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-pizza-slice">
+            <i class="fas fa-pizza-slice"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-ice-cream">
+            <i class="fas fa-ice-cream"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-dog">
+            <i class="fas fa-dog"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-bed">
+            <i class="fas fa-bed"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-utensils">
+            <i class="fas fa-utensils"></i>
+        </div>
+        
+        <div class="icon-option" data-icon="fa-cookie">
+            <i class="fas fa-cookie"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-headphones">
+            <i class="fas fa-headphones"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-laptop">
+            <i class="fas fa-laptop"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-shopping-bag">
+            <i class="fas fa-shopping-bag"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-camera">
+            <i class="fas fa-camera"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-bicycle">
+            <i class="fas fa-bicycle"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-plane">
+            <i class="fas fa-plane"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-car">
+            <i class="fas fa-car"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-rocket">
+            <i class="fas fa-rocket"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-diamond">
+            <i class="fas fa-diamond"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-coins">
+            <i class="fas fa-coins"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-gem">
+            <i class="fas fa-gem"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-paint-brush">
+            <i class="fas fa-paint-brush"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-guitar">
+            <i class="fas fa-guitar"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-tv">
+            <i class="fas fa-tv"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-book-open">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-map-marker-alt">
+            <i class="fas fa-map-marker-alt"></i>
+        </div>
+    </div>
+    
+    <input type="hidden" id="rewardIcon" value="fa-gift"> 
+</div>
+
+<div class="form-group">
+    <label for="rewardIconColor">图标颜色</label>
+    <div id="rewardColorPicker" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #4b6cb7;" data-color="#4b6cb7" title="蓝色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #5cb85c;" data-color="#5cb85c" title="绿色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #f0ad4e;" data-color="#f0ad4e" title="橙色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #d9534f;" data-color="#d9534f" title="红色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #5bc0de;" data-color="#5bc0de" title="青色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #aa66cc;" data-color="#aa66cc" title="紫色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #95a5a6;" data-color="#95a5a6" title="灰色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #e67e22;" data-color="#e67e22" title="深橙色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #3498db;" data-color="#3498db" title="亮蓝色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #2ecc71;" data-color="#2ecc71" title="亮绿色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #e74c3c;" data-color="#e74c3c" title="亮红色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #f1c40f;" data-color="#f1c40f" title="黄色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #00bcd4;" data-color="#00bcd4" title="蓝绿色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #ffeb3b;" data-color="#ffeb3b" title="亮黄色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #ff9800;" data-color="#ff9800" title="暖橙色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: #cddc39;" data-color="#cddc39" title="黄绿色"></div>
+    </div>
+    <input type="hidden" id="rewardIconColor" value="#4b6cb7">
+</div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelRewardBtn">取消</button>
+            <button class="btn btn-danger" id="deleteRewardBtn" style="display: none;">删除奖励</button>
+            <button class="btn btn-primary" id="saveRewardBtn">保存奖励</button>
+        </div>
+    </div>
+</div>
+
+<div class="data-buttons">
+    <button class="data-btn export-btn" id="exportBtn">
+        <i class="fas fa-download" data-fallback="下"></i> 备份数据
+    </button>
+    <button class="data-btn import-btn" id="importBtn">
+        <i class="fas fa-upload" data-fallback="上"></i> 导入数据
+    </button>
+    <button class="data-btn clear-btn" id="clearDataBtn">
+        <i class="fas fa-trash" data-fallback="清"></i> 清空学习计划
+    </button>
+</div>
+
+<footer>
+    <p>伴学星 - 每天进步一点点 | 由小红书博主“沐沐”原创制作 </p>
+</footer>
+</div>
+
+
+<div class="modal" id="monthViewModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>月视图</h3>
+            <button class="close-modal" id="closeMonthModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="calendar-header">
+                <div class="calendar-title" id="calendarTitle">2023年7月</div>
+                <div class="calendar-nav">
+                    <button class="nav-btn" id="prevMonthBtn">
+                        <i class="fas fa-chevron-left" data-fallback="<"></i>
+                    </button>
+                    <button class="nav-btn" id="nextMonthBtn">
+                        <i class="fas fa-chevron-right" data-fallback=">"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="calendar-grid" id="calendarGrid">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="taskModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">添加新计划</h3>
+            <button class="close-modal" id="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingTaskId">
+		<div class="form-group">
+    <div style="display: flex; gap: 10px;">
+               <div style="flex: 1;">
+            <label for="taskCategory" class="required">任务分类</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+                <select class="form-control" id="taskCategory" required style="flex:1;">
+                    
+                </select>
+                <button type="button" id="addCategoryFromTaskBtn" class="btn btn-primary"
+                        style="height:36px;width:36px;padding:0;font-size:1.2rem;"
+                        title="新增分类">
+                    +
+                </button>
+            </div>
+        </div>
+        <div style="flex: 2; position: relative;">
+    <label for="taskTemplateInput" class="required">任务名称</label>
+    <input type="text" class="form-control" id="taskTemplateInput" placeholder="输入或选择任务名称" required autocomplete="off">
+    <div id="customDropdown" class="custom-dropdown" style="display: none;">
+        
+    </div>
+    <input type="hidden" id="taskTemplateId">
+
+</div>
+    </div>
+</div>
+
+            <div class="form-group">
+                <label for="taskDescription" >任务说明</label>
+                <textarea class="form-control" id="taskDescription" rows="3" placeholder="输入任务说明（选填）" ></textarea>
+            </div>
+<div style="margin-top: 5px; display: none;" id="saveTemplateContainer">
+        <input type="checkbox" id="saveAsTemplate"> <label for="saveAsTemplate" style="font-size: 0.9rem;">同时将以上任务内容存为模板</label>
+    </div>
+                       <div class="form-group">
+                <label>计划时间（选填）</label>
+                <div class="time-inputs">
+                    <input type="time" class="form-control" id="startTime">
+					 <span style="margin: 15px 5px 0px;">至</span>
+                    <input type="time" class="form-control" id="endTime">
+                </div>
+            </div>
+<div class="form-group">
+    <label for="plannedDuration">计划用时（分钟，选填）</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="flex: 1;">
+            <input type="number" class="form-control" id="plannedDuration" placeholder="如：30" min="1" max="480"
+       oninput="toggleAutoCompleteSwitch()">
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; white-space: nowrap;">
+           <label for="autoCompleteSwitch" style="margin-left: 8px; font-size: 0.9rem;">到时自动完成</label>
+<label class="switch">
+    <input type="checkbox" id="autoCompleteSwitch" disabled>
+    <span class="slider round"></span>
+</label>
+        </div>
+    </div>
+</div>
+        <div class="form-group">
+    <label for="repeatSelect" class="required">重复频率（保存后不允许修改）</label>
+    <select class="form-control" id="repeatSelect">
+        <option value="none">仅当天</option>
+        <option value="daily">每天</option>
+        <option value="weekly">每周的这天</option>
+		<option value="weeklyMulti">每周（自选日期）</option>
+        <option value="weekdays">周一至周五</option>
+		 <option value="ebinhous">艾宾浩斯周期</option>
+        <option value="custom">自定义</option>
+    </select>
+</div>
+
+
+<div class="form-group" id="repeatOptionsContainer" style="display: none; margin-top: 10px; background: #f5f5f5; padding: 10px; border-radius: 5px;">
+    
+    <div id="weeklyOptions" style="display: none;">
+        <label>每<input type="number" id="weeksInterval" min="1" max="10" value="1" style="width: 50px; padding: 5px;"> 周重复一次</label>
+    </div>
+
+    <div id="weeklyMultiOptions" style="display: none;">
+        <label style="margin-right: 8px;">每周：</label>
+        <div class="week-day-group" style="display: inline-flex; gap: 6px;">
+            <button type="button" class="week-day-btn" data-day="1">一</button>
+            <button type="button" class="week-day-btn" data-day="2">二</button>
+            <button type="button" class="week-day-btn" data-day="3">三</button>
+            <button type="button" class="week-day-btn" data-day="4">四</button>
+            <button type="button" class="week-day-btn" data-day="5">五</button>
+            <button type="button" class="week-day-btn" data-day="6">六</button>
+            <button type="button" class="week-day-btn" data-day="0">日</button>
+        </div>
+    </div>
+    
+    <div id="customOptions" style="display: none;">
+        <label>每 <input type="number" id="daysInterval" min="1" max="30" value="1" style="width: 50px; padding: 5px;"> 天重复一次</label>
+    </div>
+</div>
+  <div class="form-group" id="dateRangeGroup">
+    <label class="required">起始日期（保存后不允许修改）</label>
+    <div class="time-inputs">
+        <input type="date" class="form-control" id="startDate" required>
+        <span style="margin: 15px 5px 0px;">至</span>
+        <input type="date" class="form-control" id="endDate" required>
+    </div>
+</div>
+
+<div class="form-group" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+    
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="pointsSwitch" style="margin: 0;">积分奖惩</label>
+        <label class="switch">
+            <input type="checkbox" id="pointsSwitch">
+            <span class="slider round"></span>
+        </label>
+    </div>
+
+    
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <label for="summaryAfterFinishSwitch" style="margin: 0;">结束后弹出学习总结</label>
+        <label class="switch">
+            <input type="checkbox" id="summaryAfterFinishSwitch">
+            <span class="slider round"></span>
+        </label>
+    </div>
+</div>
+
+
+<div class="form-group" id="pointsSettingsGroup" style="display: none;">
+    <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;"><i class="fas fa-gem"></i> 积分设置（正数加分，负数扣分）</h4>
+    <div class="form-row" style="display: flex; align-items: end; gap: 15px;">
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="pointsReward">完成奖励 (正分)</label>
+            <div class="input-with-buttons" style="display: flex; align-items: center;">
+                <button class="btn btn-outline-secondary" id="decreaseReward" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                <input type="text" class="form-control" id="pointsReward" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.max(0, parseInt(this.value) || 0);"> 
+                <button class="btn btn-outline-secondary" id="increaseReward" style="padding: 5px 10px; margin-left: 5px;">+</button>
+            </div>
+        </div>
+        <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="pointsPenalty">未完成扣减 (负分)</label>
+            <div class="input-with-buttons" style="display: flex; align-items: center;">
+                <button class="btn btn-outline-secondary" id="decreasePenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                <input type="text" class="form-control" id="pointsPenalty" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.min(0, parseInt(this.value) || 0);"> 
+                <button class="btn btn-outline-secondary" id="increasePenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+            </div>
+        </div>
+    </div>
+    <div style="display: flex; gap: 15px; margin-top: 15px;">
+        <div class="form-group" style="flex: 1; margin: 0;">
+            <label for="pointsLatePenalty">逾期完成 (可正负分)</label>
+            <div class="input-with-buttons" style="display: flex; align-items: center;">
+                <button class="btn btn-outline-secondary" id="decreaseLatePenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                <input type="text" class="form-control" id="pointsLatePenalty" value="0" style="margin: 0 5px; text-align: center;"> 
+                <button class="btn btn-outline-secondary" id="increaseLatePenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+            </div>
+        </div>
+        <div class="form-group" style="flex: 1; margin: 0;">
+            <label for="pointsTimeoutPenalty">超时扣分 (负分)</label>
+            <div class="input-with-buttons" style="display: flex; align-items: center;">
+                <button class="btn btn-outline-secondary" id="decreaseTimeoutPenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                <input type="text" class="form-control" id="pointsTimeoutPenalty" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.min(0, parseInt(this.value) || 0);">
+                <button class="btn btn-outline-secondary" id="increaseTimeoutPenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelBtn">取消</button>
+                <button class="btn btn-primary" id="saveTaskBtn">保存计划</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="batchTaskModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>批量添加任务</h3>
+            <button class="close-modal" id="closeBatchModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>批量输入任务（请按默认格式录入）</label>
+              <textarea class="form-control" id="batchTaskInputNew" rows="10" placeholder="请确保所有科目名称已经录入模版，否则无法识别&#10;语文作业（科目单独占一行）&#10;1、完成《大青树下的小学》阅读单（一项作业占一行）&#10;2、预习《花的学校》&#10;数学作业（其他科目再另起一行）&#10;1、完成练习册第10页&#10;2、预习下一节"></textarea>
+                <div style="font-size: 0.8rem; color: #666; margin-top: 5px;">
+
+                </div>
+            </div>
+
+                       
+            <div class="form-group">
+                <label>计划时间（选填）</label>
+                <div class="time-inputs">
+                    <input type="time" class="form-control" id="batchStartTime">
+                    <span style="margin:15px 5px 0px;">至</span>
+                    <input type="time" class="form-control" id="batchEndTime">
+                </div>
+            </div>
+
+            
+            <div class="form-group">
+                <label for="batchPlannedDuration">计划用时（分钟，选填）</label>
+                <input type="number" class="form-control" id="batchPlannedDuration"
+                       placeholder="如：30" min="1" max="480">
+            </div>
+
+            <div class="form-group">
+                <label for="batchRepeatSelect" class="required">重复频率（保存后不允许修改）</label>
+                <select class="form-control" id="batchRepeatSelect">
+                    <option value="none">仅当天</option>
+                    <option value="daily">每天</option>
+                    <option value="weekly">每周的这天</option>
+					<option value="weeklyMulti">每周（自选日期）</option>
+                    <option value="weekdays">周一至周五</option>
+					<option value="ebinhous">艾宾浩斯周期</option>
+                    <option value="custom">自定义</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="batchRepeatOptionsContainer" style="display: none; margin-top: 10px; background: #f5f5f5; padding: 10px; border-radius: 5px;">
+                
+                <div id="batchWeeklyOptions" style="display: none;">
+                    <label>每<input type="number" id="batchWeeksInterval" min="1" max="10" value="1" style="width: 50px; padding: 5px;"> 周重复一次</label>
+                </div>
+
+<div id="batchWeeklyMultiOptions" style="display: none; margin-top: 10px;">
+    <label style="margin-right: 8px;">每周：</label>
+    <div class="week-day-group" style="display: inline-flex; gap: 6px;">
+        <button type="button" class="week-day-btn" data-day="1">一</button>
+        <button type="button" class="week-day-btn" data-day="2">二</button>
+        <button type="button" class="week-day-btn" data-day="3">三</button>
+        <button type="button" class="week-day-btn" data-day="4">四</button>
+        <button type="button" class="week-day-btn" data-day="5">五</button>
+        <button type="button" class="week-day-btn" data-day="6">六</button>
+        <button type="button" class="week-day-btn" data-day="0">日</button>
+    </div>
+</div>
+                
+                <div id="batchCustomOptions" style="display: none;">
+                    <label>每 <input type="number" id="batchDaysInterval" min="1" max="30" value="1" style="width: 50px; padding: 5px;"> 天重复一次</label>
+                </div>
+            </div>
+
+            <div class="form-group" id="batchDateRangeGroup">
+                <label class="required">起始日期（保存后不允许修改）</label>
+                <div class="time-inputs">
+                    <input type="date" class="form-control" id="batchStartDate" required>
+                    <span style="margin: 15px 5px 0px;">至</span>
+                    <input type="date" class="form-control" id="batchEndDate" required>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelBatchBtn">取消</button>
+                <button class="btn btn-primary" id="saveBatchBtn">保存计划</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="categoryModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="categoryModalTitle">添加模版分类</h3>
+            <button class="close-modal" id="closeCategoryModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingCategoryId">
+            <div class="form-group">
+                <label for="categoryName" class="required">模板分类名称</label>
+                <input type="text" class="form-control" id="categoryName" placeholder="输入分类名称" required maxlength="10">
+                <div class="error-message" id="categoryNameError" style="color: red; font-size: 0.8rem; display: none;"></div>
+            </div>
+
+       <div class="form-group">
+    <label class="required">选择图标</label>
+    <div class="icon-selection-container">
+        <div class="icon-option selected" data-icon="fa-book">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-calculator">
+            <i class="fas fa-calculator"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-language">
+            <i class="fas fa-language"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-running">
+            <i class="fas fa-running"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-laptop-code">
+            <i class="fas fa-laptop-code"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-globe-asia">
+            <i class="fas fa-globe-asia"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-music">
+            <i class="fas fa-music"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-paint-brush">
+            <i class="fas fa-paint-brush"></i>
+        </div>
+        
+        <div class="icon-option" data-icon="fa-pencil-alt">
+            <i class="fas fa-pencil-alt"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-square-root-alt">
+            <i class="fas fa-square-root-alt"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-flask">
+            <i class="fas fa-flask"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-history">
+            <i class="fas fa-history"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-palette">
+            <i class="fas fa-palette"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-basketball-ball">
+            <i class="fas fa-basketball-ball"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-utensils">
+            <i class="fas fa-utensils"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-heart">
+            <i class="fas fa-heart"></i>
+        </div>
+        
+        <div class="icon-option" data-icon="fa-atom">
+            <i class="fas fa-atom"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-dna">
+            <i class="fas fa-dna"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-map-marked-alt">
+            <i class="fas fa-map-marked-alt"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-balance-scale">
+            <i class="fas fa-balance-scale"></i>
+        </div>
+        <div class="icon-option" data-icon="fa-microscope">
+            <i class="fas fa-microscope"></i>
+        </div>
+    </div>
+    
+    <input type="hidden" id="categoryIcon" value="fa-book" required>
+</div>
+
+<div class="form-group">
+    <label for="categoryColor" class="required">选择颜色</label>
+    <div id="colorPicker" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(75, 108, 183, 0.8);" data-color="rgba(75, 108, 183, 0.8)" title="蓝色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(92, 184, 92, 0.8);" data-color="rgba(92, 184, 92, 0.8)" title="绿色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(255, 152, 0, 0.8);" data-color="rgba(255, 152, 0, 0.8)" title="橙色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(244, 67, 54, 0.8);" data-color="rgba(244, 67, 54, 0.8)" title="红色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(91, 192, 222, 0.8);" data-color="rgba(91, 192, 222, 0.8)" title="浅蓝"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(170, 102, 204, 0.8);" data-color="rgba(170, 102, 204, 0.8)" title="紫色"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(0, 150, 136, 0.8);" data-color="rgba(0, 150, 136, 0.8)" title="青绿"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(233, 30, 99, 0.8);" data-color="rgba(233, 30, 99, 0.8)" title="粉红"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(63, 81, 181, 0.8);" data-color="rgba(63, 81, 181, 0.8)" title="靛蓝"></div>
+        <div class="color-option" style="width: 30px; height: 30px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; background: rgba(156, 39, 176, 0.8);" data-color="rgba(156, 39, 176, 0.8)" title="深紫"></div>
+    </div>
+    <input type="hidden" id="categoryColor" value="rgba(75, 108, 183, 0.8)">
+</div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelCategoryBtn">取消</button>
+                <button class="btn btn-primary" id="saveCategoryBtn">保存分类</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="templateModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="templateModalTitle">添加新任务模板</h3>
+            <button class="close-modal" id="closeTemplateModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingTemplateId">
+            <div class="form-group">
+                <label for="templateCategory" class="required">任务分类</label>
+                <select class="form-control" id="templateCategory" required>
+                    
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="templateName" class="required">任务名称</label>
+                <input type="text" class="form-control" id="templateName" placeholder="输入任务名称" required maxlength="10">
+                <div class="error-message" id="templateNameError" style="color: red; font-size: 0.8rem; display: none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="templateDescription" class="required">任务说明</label>
+                <textarea class="form-control" id="templateDescription" rows="3" placeholder="输入任务说明" required></textarea>
+            </div>
+
+            
+            <div class="form-group" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 15px;">
+                
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="templatePointsSwitch" style="margin: 0;">积分奖惩</label>
+                    <label class="switch">
+                        <input type="checkbox" id="templatePointsSwitch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+
+                
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <label for="templateSummarySwitch" style="margin: 0;">结束后弹出学习总结</label>
+                    <label class="switch">
+                        <input type="checkbox" id="templateSummarySwitch">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+            </div>
+
+            
+            <div class="form-group" id="templatePointsSettingsGroup" style="display: none; margin-top: 15px;">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;"><i class="fas fa-gem"></i> 积分设置（正数加分，负数扣分）</h4>
+                <div class="form-row" style="display: flex; align-items: end; gap: 15px;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="templatePointsReward">完成奖励 (正分)</label>
+                        <div class="input-with-buttons" style="display: flex; align-items: center;">
+                            <button class="btn btn-outline-secondary" id="templateDecreaseReward" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                            <input type="text" class="form-control" id="templatePointsReward" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.max(0, parseInt(this.value) || 0);">
+                            <button class="btn btn-outline-secondary" id="templateIncreaseReward" style="padding: 5px 10px; margin-left: 5px;">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 0;">
+                        <label for="templatePointsPenalty">未完成扣减 (负分)</label>
+                        <div class="input-with-buttons" style="display: flex; align-items: center;">
+                            <button class="btn btn-outline-secondary" id="templateDecreasePenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                            <input type="text" class="form-control" id="templatePointsPenalty" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.min(0, parseInt(this.value) || 0);">
+                            <button class="btn btn-outline-secondary" id="templateIncreasePenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 15px; margin-top: 15px;">
+                    <div class="form-group" style="flex: 1; margin: 0;">
+                        <label for="templatePointsLatePenalty">逾期完成 (可正负分)</label>
+                        <div class="input-with-buttons" style="display: flex; align-items: center;">
+                            <button class="btn btn-outline-secondary" id="templateDecreaseLatePenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                            <input type="text" class="form-control" id="templatePointsLatePenalty" value="0" style="margin: 0 5px; text-align: center;">
+                            <button class="btn btn-outline-secondary" id="templateIncreaseLatePenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+                        </div>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin: 0;">
+                        <label for="templatePointsTimeoutPenalty">超时扣分 (负分)</label>
+                        <div class="input-with-buttons" style="display: flex; align-items: center;">
+                            <button class="btn btn-outline-secondary" id="templateDecreaseTimeoutPenalty" style="padding: 5px 10px; margin-right: 5px;">-</button>
+                            <input type="text" class="form-control" id="templatePointsTimeoutPenalty" value="0" style="margin: 0 5px; text-align: center;" oninput="this.value = Math.min(0, parseInt(this.value) || 0);">
+                            <button class="btn btn-outline-secondary" id="templateIncreaseTimeoutPenalty" style="padding: 5px 10px; margin-left: 5px;">+</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelTemplateBtn">取消</button>
+                <button class="btn btn-primary" id="saveTemplateBtn">保存任务</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="stopTaskModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-stop-circle" style="color: #FF9800; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>结束任务计时后无法继续计时</h3>
+            <p style="margin: 15px 0;">请选择任务完成状态：</p>
+        </div>
+        <div class="confirmation-actions">
+    <button class="btn btn-secondary" id="stopCancelBtn">取消</button>
+    <button class="btn btn-warning" id="stopNotCompleteBtn" style="background: #FF9800; color: white;">未完成</button>
+    <button class="btn btn-info" id="quickCompleteBtn" style="background: #17a2b8; color: white;">手动完成</button>
+	<button class="btn btn-primary" id="stopConfirmBtn">已完成</button>
+
+</div>
+    </div>
+</div>
+
+
+<div class="modal" id="studySummaryModal" style="z-index: 3000;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>添加学习总结</h3>
+            <button class="close-modal" id="closeStudySummaryModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            
+            <div class="form-group">
+                <h4 style="margin-bottom: 15px; color: var(--primary);">学习评分</h4>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    
+                    <div class="rating-item" style="width: calc(50% - 5px); margin-bottom: 15px; box-sizing: border-box; padding-right: 10px;">
+                        <label style="display: block; width: 100%; font-weight: 600; margin-bottom: 5px;">专注度:</label>
+                        <div class="star-rating" data-rating-type="focus">
+                            <span class="star" data-value="1"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="fas fa-star"></i></span>
+                        </div>
+                    </div>
+
+                    
+                    <div class="rating-item" style="width: calc(50% - 5px); margin-bottom: 15px; box-sizing: border-box; padding-left: 10px;">
+                        <label style="display: block; width: 100%; font-weight: 600; margin-bottom: 5px;">熟练度:</label>
+                        <div class="star-rating" data-rating-type="proficiency">
+                            <span class="star" data-value="1"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="fas fa-star"></i></span>
+                        </div>
+                    </div>
+
+                    
+                    <div class="rating-item" style="width: calc(50% - 5px); margin-bottom: 15px; box-sizing: border-box; padding-right: 10px;">
+                        <label style="display: block; width: 100%; font-weight: 600; margin-bottom: 5px;">正确率:</label>
+                        <div class="star-rating" data-rating-type="accuracy">
+                            <span class="star" data-value="1"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="fas fa-star"></i></span>
+                        </div>
+                    </div>
+
+                    
+                    <div class="rating-item" style="width: calc(50% - 5px); margin-bottom: 15px; box-sizing: border-box; padding-left: 10px;">
+                        <label style="display: block; width: 100%; font-weight: 600; margin-bottom: 5px;">速度:</label>
+                        <div class="star-rating" data-rating-type="speed">
+                            <span class="star" data-value="1"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="2"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="3"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="4"><i class="fas fa-star"></i></span>
+                            <span class="star" data-value="5"><i class="fas fa-star"></i></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="form-group">
+                <label for="studySummaryContent" style="display: block; margin-bottom: 5px;">学习总结</label>
+                
+                <div style="display: flex; justify-content: flex-start; align-items: center; gap: 15px; margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; gap: 5px; flex: 1;">
+                        <label for="commonSummarySelect" style="font-size: 0.9rem; color: var(--text-light); margin: 0; min-width: 50px;">常用语:</label>
+                        <select id="commonSummarySelect" class="form-control" style="height: auto; min-height: 32px; font-size: 0.9rem; padding: 4px 8px; border: 1px solid #e0e0e0; border-radius: 4px; flex: 1; max-width: 300px; white-space: normal; word-wrap: break-word;">
+                            <option value="">选择常用总结语</option>
+                            
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn btn-sm btn-secondary" id="manageCommonSummaryBtn" style="padding: 4px 10px; font-size: 0.9rem;">
+                            <i class="fas fa-cog"></i> 管理常用语
+                        </button>
+                    </div>
+                </div>
+                <textarea id="studySummaryContent" class="form-control" rows="6" style="resize: none; max-height: 250px; overflow-y: auto;"></textarea>
+                <input type="hidden" id="currentTaskIdForSummary">
+                
+                <input type="hidden" id="summaryRatings" value="{}">
+            </div>
+
+            
+            <div class="modal" id="commonSummaryModal" style="z-index: 3500;">
+                <div class="modal-content" style="width: 500px;">
+                    <div class="modal-header">
+                        <h3>管理常用总结语</h3>
+                        <button class="close-modal" id="closeCommonSummaryModal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label for="commonSummaryText">常用总结语</label>
+                            <textarea id="commonSummaryText" class="form-control" rows="3" style="resize: none;"></textarea>
+                            <input type="hidden" id="currentCommonSummaryId" value="">
+                        </div>
+                        <div class="form-actions" style="margin-bottom: 20px;">
+                            <button class="btn btn-primary" id="saveCommonSummaryBtn">保存</button>
+                            <button class="btn btn-secondary" id="cancelCommonSummaryBtn">取消</button>
+                        </div>
+                        <h4>常用总结语列表</h4>
+                        <div id="commonSummaryListManager" style="margin-top: 10px; max-height: 200px; overflow-y: auto;">
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelSummaryBtn">取消</button>
+            <button class="btn btn-primary" id="saveSummaryBtn">保存</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="deleteModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3 id="deleteModalTitle"><i class="fas fa-trash-alt" style="color: #F44336; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3 id="deleteModalMessage">确认删除任务</h3>
+            <div class="single-delete-message" id="singleDeleteMessage">
+                <p>确定要删除此任务吗？此操作不可恢复。</p>
+            </div>
+            <div class="delete-options" id="deleteOptions">
+                <div class="delete-option">
+                    <input type="radio" name="deleteOption" id="deleteSingle" value="single" checked>
+                    <label for="deleteSingle">仅删除当前日期的学习计划</label>
+                </div>
+                <div class="delete-option">
+                    <input type="radio" name="deleteOption" id="deleteRecurring" value="recurring">
+                    <label for="deleteRecurring">删除此次及其所有未来的重复计划</label>
+                </div>
+            </div>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="cancelDeleteBtn">取消</button>
+            <button class="btn btn-primary" id="confirmDeleteBtn">确认删除</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="clearDataModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-exclamation-triangle" style="color: #F44336; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>确认清空所有学习计划数据</h3>
+            <p style="margin: 15px 0;">此操作将删除所有学习计划数据，但保留分类和任务模板，且不可恢复！</p>
+
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="cancelClearBtn">取消</button>
+            <button class="btn btn-primary" id="confirmClearBtn">确认清空</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="alertModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3 id="alertTitle"><i class="fas fa-exclamation-circle" style="color: #F44336; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <p id="alertMessage" style="margin: 15px 0;"></p>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-primary" id="alertConfirmBtn">确定</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="editScopeModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-edit" style="color: #4b6cb7; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>选择编辑范围</h3>
+            <p style="margin: 15px 0;">请选择要编辑的范围：</p>
+            <div class="delete-options">
+                <div class="delete-option">
+                    <input type="radio" name="editScope" id="editSingle" value="single" checked>
+                    <label for="editSingle">仅编辑此计划</label>
+                </div>
+                <div class="delete-option">
+                    <input type="radio" name="editScope" id="editRecurring" value="recurring">
+                    <label for="editRecurring">编辑此次及所有后续重复计划</label>
+                </div>
+            </div>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="cancelScopeBtn">取消</button>
+            <button class="btn btn-primary" id="confirmScopeBtn">确认</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="focusModal">
+    <div class="focus-container">
+    <div class="focus-task-card" id="focusTaskCard">
+        
+    </div>
+</div>
+</div>
+
+
+<div class="modal" id="congratsModal">
+    <div class="congrats-content">
+        <button class="close-congrats">&times;</button>
+        <div class="congrats-icon">
+            <i class="fas fa-trophy"></i>
+        </div>
+        <h2>祝贺你！规划执行小能手！</h2>
+        <p class="congrats-message">今日任务已全部完成！</p>
+        <div class="stats-details">
+            <p>今日学习时间: <span id="congratsStudyTime"></span></p>
+            <p>运动户外时间: <span id="congratsSportsTime"></span></p>
+            <p>计划任务数量: <span id="congratsTotalTasks"></span>个</p>
+            <p>完成率: <span id="congratsCompletionRate">100%</span></p>
+        </div>
+        <p class="backup-tip">为避免数据丢失，建议你立即备份数据</p>
+        <button class="backup-btn" id="congratsBackupBtn">
+            <i class="fas fa-download"></i> 备份数据
+        </button>
+    </div>
+</div>
+
+
+<div class="confirmation-modal" id="importConfirmModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-file-import" style="color: #4b6cb7; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>选择导入方式</h3>
+            <p style="margin: 15px 0;">请选择数据导入方式：</p>
+
+            <div class="import-options">
+                <div class="import-option">
+                    <input type="radio" id="importOverwrite" name="importOption" value="overwrite">
+                    <label for="importOverwrite">
+                        <i class="fas fa-sync-alt" style="color: #e74c3c;"></i> 覆盖导入
+                    </label>
+                </div>
+                <div class="option-description">
+                    清除当前所有数据（包括分类、任务模板、计划和计时器），替换为新的数据！
+                </div>
+
+                <div class="import-option">
+                    <input type="radio" id="importAppend" name="importOption" value="append" checked>
+                    <label for="importAppend">
+                        <i class="fas fa-plus-circle" style="color: #27ae60;"></i> 追加导入
+                    </label>
+                </div>
+                <div class="option-description">
+                    保留当前数据并添加新数据，重复数据不会添加！
+                </div>
+            </div>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="importCancelBtn">取消</button>
+            <button class="btn btn-primary" id="importConfirmBtn">确认导入</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="manualTimeModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>手动设置任务实际时间</h3>
+            <button class="close-modal" id="closeManualTimeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <div class="time-inputs" style="display: flex; gap: 10px; align-items: center;">
+                    <div style="flex: 1;">
+                        <label for="manualStartTime" style="font-size: 0.9rem; margin-bottom: 5px;">开始时间</label>
+                        <input type="time" class="form-control" id="manualStartTime" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="manualDuration" style="font-size: 0.9rem; margin-bottom: 5px;">实际用时(分钟)</label>
+                        <input type="number" class="form-control" id="manualDuration" min="1" max="480" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label for="manualEndTime" style="font-size: 0.9rem; margin-bottom: 5px;">结束时间</label>
+                        <input type="time" class="form-control" id="manualEndTime" required>
+                    </div>
+                </div>
+            </div>
+            <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px;">
+                <p style="margin: 0; font-size: 0.9rem; color: #666;">
+                    <i class="fas fa-info-circle"></i> 请先定好结束时间，开始时间和实际用时可以联动计算
+                </p>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelManualTimeBtn">取消</button>
+            <button class="btn btn-primary" id="confirmManualTimeBtn">确定</button>
+        </div>
+    </div>
+</div>
+
+<div class="confirmation-modal" id="confirmReplaceTimeModal">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <h3><i class="fas fa-exclamation-triangle" style="color: #FF9800; font-size: 48px; margin-bottom: 20px;"></i></h3>
+            <h3>确认替换时间</h3>
+            <p id="replaceTimeMessage" style="margin: 15px 0;">您设置的实际用时会替换现有的实际时间及实际用时，是否确认？</p>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-secondary" id="cancelReplaceTimeBtn">取消</button>
+            <button class="btn btn-primary" id="confirmReplaceTimeBtn">确定</button>
+        </div>
+    </div>
+</div>
+
+<div class="confirmation-modal" id="unlockedBadgeModal" style="z-index:3000;">
+    <div class="confirmation-content">
+        <div class="confirmation-body">
+            <div class="congrats-badge-content">
+                <div class="badge-ribbon">新的勋章成就解锁</div>
+                <h3 class="badge-title">恭喜获得以下勋章</h3>
+                <div class="badge-icon-container">
+                    <div class="badge-icon-wrapper">
+                        <div class="badge-icon-bg"></div>
+                        <i class="fas fa-trophy" id="unlockedBadgeIcon"></i>
+                    </div>
+                </div>
+                <h4 class="badge-name" id="unlockedBadgeName"></h4>
+                <p class="badge-description" id="unlockedBadgeDescription"></p>
+                <div class="badge-footer">
+                    <p>希望你继续努力，再创佳绩！</p>
+                </div>
+            </div>
+        </div>
+        <div class="confirmation-actions">
+            <button class="btn btn-primary" id="closeUnlockedBadgeBtn" style="background: linear-gradient(to bottom, #4b6cb7, #3a5795); padding: 10px 25px; font-size: 1.1rem;">
+                <i class="fas fa-check-circle"></i> 收入囊中！
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="batchPreviewModal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3>批量任务预览</h3>
+            <button class="close-modal" id="closePreviewModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p style="margin-bottom: 15px; color: #666;">请仔细核对以下识别结果，确认无误后点击"保存计划"</p>
+            <div style="max-height: 400px; overflow-y: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background-color: #f5f7fa;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">序号</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd;">分类</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd; width: 15%;">任务名</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #ddd; width: 45%; word-break: break-word;">任务内容</th>
+                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #ddd;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="previewTableBody">
+                        
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions" style="margin-top: 20px;">
+                <button class="btn btn-secondary" id="closePreviewBtn">关闭</button>
+                <button class="btn btn-primary" id="confirmBatchSaveBtn">保存计划</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="badgeModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="badgeModalTitle">添加新勋章</h3>
+            <button class="close-modal" id="closeBadgeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingBadgeId">
+            <div class="form-group">
+                <label for="badgeName" class="required">勋章名称</label>
+                <input type="text" class="form-control" id="badgeName" placeholder="输入勋章名称" required maxlength="20">
+            </div>
+            <div class="form-group">
+                <label for="badgeDescription">勋章描述</label>
+                <textarea class="form-control" id="badgeDescription" rows="2" placeholder="输入勋章描述"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="badgeIcon" class="required">选择图标</label>
+                <select class="form-control" id="badgeIcon" required>
+                    <option value="fa-trophy">奖杯</option>
+                    <option value="fa-medal">勋章</option>
+                    <option value="fa-star">星星</option>
+                    <option value="fa-award">奖项</option>
+                    <option value="fa-crown">皇冠</option>
+                    <option value="fa-gem">宝石</option>
+                    <option value="fa-heart">心形</option>
+                    <option value="fa-fire">火焰</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="badgeColor" class="required">选择颜色</label>
+                <select class="form-control" id="badgeColor" required>
+                    <option value="#FFD700">金色</option>
+                    <option value="#CD7F32">古铜色</option>
+                    <option value="#4b6cb7">蓝色</option>
+                    <option value="#2ecc71">绿色</option>
+                    <option value="#e74c3c">红色</option>
+                    <option value="#9b59b6">紫色</option>
+                    <option value="#f39c12">橙色</option>
+                </select>
+            </div>
+            
+<div class="form-group">
+    <label for="badgeCondition" class="required">解锁条件</label>
+    <select class="form-control" id="badgeCondition" required>
+        <option value="totalStudyTime">总学习时间达到(小时)</option>
+        <option value="totalSportsTime">总运动时间达到(小时)</option>
+        <option value="continuousDays">连续学习天数达到</option>
+        <option value="totalTasksCompleted">完成任务总数达到</option>
+        <option value="dailyTasksCompleted">单日完成任务数达到</option>
+        <option value="categoryMastery">某个分类精通(小时)</option>
+        <option value="categoryTasksCompleted">某个分类完成任务数达到</option>
+        <option value="specificTaskCompleted">特定任务完成次数达到</option>
+        <option value="weeklyStudyGoal">周学习目标达成次数</option>
+		<option value="dailyCompletionRate">（重复）单日任务完成率达标</option>
+    <option value="dailyStudyTime">（重复）单日学习时间达到(小时)</option>
+	<option value="dailySpecificTaskTime">（重复）单日特定任务时间达到(分钟)</option>
+    <option value="weeklySpecificTaskCount">（重复）单周特定任务达成次数</option>
+    <option value="monthlyTaskCount">（重复）单月完成任务数达到</option>
+    <option value="monthlyStudyTime">（重复）单月学习时长达到</option>
+    </select>
+</div>
+            <div class="form-group" id="badgeConditionValueGroup">
+                <label for="badgeConditionValue" class="required">条件值</label>
+                <input type="number" class="form-control" id="badgeConditionValue" placeholder="输入条件值" required min="1">
+            </div>
+            <div class="form-group" id="badgeCategoryGroup" style="display: none;">
+    <label for="badgeCategory" class="required">选择分类</label>
+    <select class="form-control" id="badgeCategory">
+        
+    </select>
+</div>
+
+<div class="form-group" id="badgeTaskGroup" style="display: none;">
+    <label for="badgeTask" class="required">选择任务</label>
+    <select class="form-control" id="badgeTask">
+        
+    </select>
+</div>
+            <div class="form-actions">
+    <button class="btn btn-secondary" id="cancelBadgeBtn">取消</button>
+    <button class="btn btn-danger" id="deleteBadgeBtn" style="display: none;">删除勋章</button>
+    <button class="btn btn-primary" id="saveBadgeBtn">保存勋章</button>
+</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="batchBadgeModal">
+    <div class="modal-content" style="max-width: 1000px;">
+        <div class="modal-header">
+            <h3>批量添加勋章</h3>
+            <button class="close-modal" id="closeBatchBadgeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                <button class="btn btn-primary" id="addBatchBadgeRowBtn" style="padding: 8px 15px;">
+                    <i class="fas fa-plus"></i> 添加一行
+                </button>
+                <span style="color: #666; font-size: 0.9rem;">一行一枚勋章，点击按钮添加新的一行</span>
+            </div>
+            <div style="max-height: 400px; overflow-y: auto; border: 1px solid #e9ecef; border-radius: 8px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="background-color: #f8f9fa;">
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">勋章名称</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">描述</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">图标</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">颜色</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">解锁条件</th>
+                            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e9ecef; font-weight: 600;">条件值</th>
+                            <th style="padding: 12px; text-align: center; border-bottom: 1px solid #e9ecef; font-weight: 600;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchBadgeTableBody">
+                        
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn btn-secondary" id="cancelBatchBadgeBtn" style="padding: 10px 20px;">取消</button>
+                <button class="btn btn-primary" id="saveBatchBadgeBtn" style="padding: 10px 20px;">保存所有勋章</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="scorePreviewModal">
+  <div class="modal-content" style="max-width:800px;">
+    <div class="modal-header">
+      <h3>成绩详情</h3>
+      <div style="margin-left:auto;display:flex;gap:8px;">
+        <button class="btn btn-sm btn-outline-primary" id="btnPreviewEdit" title="编辑">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="btn btn-sm btn-outline-danger"  id="btnPreviewDel"  title="删除">
+          <i class="fas fa-trash"></i>
+        </button>
+        <button class="btn btn-sm btn-secondary"      id="btnPreviewClose">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" id="scorePreviewBody">
+      
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="scoreModal">
+    <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-header">
+            <h3 id="scoreModalTitle">添加考试成绩</h3>
+            <button class="close-modal" id="closeScoreModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editingScoreId">
+
+            
+            <div class="form-group">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+                    <i class="fas fa-info-circle"></i> 基础信息
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+    <div style="position: relative;">
+        <label for="scoreYear" class="required">学年</label>
+        <input type="text" class="form-control" id="scoreYear" placeholder="输入或选择学年，如：2025" required autocomplete="off">
+        <div id="scoreYearDropdown" class="custom-dropdown" style="display: none;">
+            
+        </div>
+    </div>
+    <div style="position: relative;">
+        <label for="scoreGrade" class="required">年级</label>
+        <input type="text" class="form-control" id="scoreGrade" placeholder="输入或选择年级，如：三年级" required autocomplete="off">
+        <div id="scoreGradeDropdown" class="custom-dropdown" style="display: none;">
+            
+        </div>
+    </div>
+    <div style="position: relative;">
+        <label for="scoreSemester" class="required">学期</label>
+        <input type="text" class="form-control" id="scoreSemester" placeholder="输入或选择学期，如：上学期" required autocomplete="off">
+        <div id="scoreSemesterDropdown" class="custom-dropdown" style="display: none;">
+            
+        </div>
+    </div>
+</div>
+            </div>
+
+            
+            <div class="form-group">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+                    <i class="fas fa-file-alt"></i> 考试信息
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label for="examDate" class="required">考试日期</label>
+                        <input type="date" class="form-control" id="examDate" required>
+                    </div>
+                    <div>
+                        <label for="examName" class="required">考试名称</label>
+                        <input type="text" class="form-control" id="examName" placeholder="如：第一单元测试" required>
+                    </div>
+                  <div style="position: relative;">
+    <label for="examType" class="required">考试类型</label>
+    <input type="text" class="form-control" id="examType" placeholder="输入或选择考试类型，如：单元测试" required autocomplete="off">
+    <div id="examTypeDropdown" class="custom-dropdown" style="display: none;">
+        
+    </div>
+</div>
+                </div>
+            </div>
+
+            
+            <div class="form-group">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+                    <i class="fas fa-graduation-cap"></i> 成绩信息
+                </h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                  <div>
+    <label for="scoreSubject" class="required">科目</label>
+    <div style="display:flex;gap:6px;align-items:center;">
+        <select class="form-control" id="scoreSubject" required style="flex:1;">
+            
+        </select>
+                <button type="button" class="btn btn-primary" id="addCategoryFromScoreBtn"
+                style="height:36px;width:36px;padding:0;font-size:1.2rem;"
+                title="新增分类"
+                onclick="event.stopPropagation()">
+            +
+        </button>
+    </div>
+</div>
+                    <div>
+                        <label for="scoreTotal">总分</label>
+                        <input type="number" class="form-control" id="scoreTotal" placeholder="如：100">
+                    </div>
+                </div>
+               <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr; gap: 15px;">
+    <div>
+        <label for="scoreTarget">目标分</label>
+        <input type="number" class="form-control" id="scoreTarget" placeholder="期望分数">
+    </div>
+    <div>
+        <label for="scoreActual" class="required">得分</label>
+        <input type="number" class="form-control" id="scoreActual" placeholder="实际分数" required>
+    </div>
+    <div>
+        <label for="scoreAverage">平均分</label>
+        <input type="number" class="form-control" id="scoreAverage" placeholder="班级平均分">
+    </div>
+    <div>
+        <label for="scoreMax">最高分</label>
+        <input type="number" class="form-control" id="scoreMax" placeholder="班级最高分">
+    </div>
+    <div>
+        <label for="scoreMedian">中位数</label>
+        <input type="number" class="form-control" id="scoreMedian" placeholder="班级中位数">
+    </div>
+    
+    <div>
+        <label for="scorePerformance">考试表现</label>
+        <select class="form-control" id="scorePerformance">
+            <option value="">请选择</option>
+            <option value="学神">学神</option>
+            <option value="完美">完美</option>
+            <option value="优秀">优秀</option>
+            <option value="良好">良好</option>
+            <option value="一般">一般</option>
+            <option value="待提高">待提高</option>
+            <option value="及格">及格</option>
+            <option value="差">差</option>
+            <option value="极差">极差</option>
+        </select>
+    </div>
+</div>
+            </div>
+
+            
+            <div class="form-group">
+                <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+                    <i class="fas fa-trophy"></i> 排名信息
+                </h4>
+                <div id="rankingsContainer">
+                  <div class="ranking-item" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 10px;">
+    <div style="position: relative;">
+        <label>排名类型</label>
+        <input type="text" class="form-control ranking-type" placeholder="输入或选择排名类型，如：班级排名">
+        <div class="custom-dropdown" style="display: none;">
+            <div class="dropdown-item">班级排名</div>
+            <div class="dropdown-item">年级排名</div>
+            <div class="dropdown-item">全校排名</div>
+            <div class="dropdown-item">区排名</div>
+            <div class="dropdown-item">市排名</div>
+            <div class="dropdown-item">省排名</div>
+            <div class="dropdown-item">全国排名</div>
+        </div>
+    </div>
+    <div>
+        <label>名次</label>
+        <input type="number" class="form-control ranking-position" placeholder="如：5">
+    </div>
+</div>
+                </div>
+                <button type="button" class="btn btn-secondary" id="addRankingBtn" style="margin-top: 10px;">
+    <i class="fas fa-plus"></i> 添加排名
+</button>
+
+
+<template id="rankingRowTemplate">
+  <div class="ranking-item" style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;align-items:end;margin-bottom:10px">
+      <div style="position: relative;">
+          <label>排名类型</label>
+          <input type="text" class="form-control ranking-type" placeholder="输入或选择排名类型，如：班级排名">
+          <div class="custom-dropdown" style="display: none;">
+              <div class="dropdown-item">班级排名</div>
+              <div class="dropdown-item">年级排名</div>
+              <div class="dropdown-item">全校排名</div>
+              <div class="dropdown-item">区排名</div>
+              <div class="dropdown-item">市排名</div>
+              <div class="dropdown-item">省排名</div>
+              <div class="dropdown-item">全国排名</div>
+          </div>
+      </div>
+      <div>
+          <label>名次</label>
+          <input type="number" class="form-control ranking-position" placeholder="如：5">
+      </div>
+      <div>
+          <button type="button" class="btn btn-outline-danger btn-sm remove-ranking-btn" style="margin-top:24px">
+              <i class="fas fa-trash"></i>
+          </button>
+      </div>
+  </div>
+</template>
+            </div>
+
+            
+         <div class="form-group">
+    <h4 style="color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid var(--primary); padding-bottom: 5px;">
+        <i class="fas fa-exclamation-triangle"></i> 薄弱总结
+    </h4>
+    <div id="weaknessContainer"></div>
+    <button type="button" class="btn btn-secondary" id="addWeaknessBtn" style="margin-top: 10px;">
+        <i class="fas fa-plus"></i> 添加薄弱项
+    </button>
+</div>
+
+
+<div id="weaknessTemplate" style="display: none;">
+    <div class="weakness-item" style="margin-bottom: 10px;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: end;">
+            <div style="position: relative;">
+                <label>题型</label>
+                <input type="text" class="form-control weakness-question-type" placeholder="输入或选择题型">
+                <div class="custom-dropdown" style="display: none;">
+                    <div class="dropdown-item">选择题</div>
+                    <div class="dropdown-item">填空题</div>
+                    <div class="dropdown-item">解答题</div>
+                    <div class="dropdown-item">计算题</div>
+                    <div class="dropdown-item">证明题</div>
+                    <div class="dropdown-item">应用题</div>
+                </div>
+            </div>
+            <div style="position: relative;">
+                <label>知识点</label>
+                <input type="text" class="form-control weakness-knowledge-point" placeholder="输入或选择知识点">
+                <div class="custom-dropdown" style="display: none;">
+                    <div class="dropdown-item">拼音</div>
+                    <div class="dropdown-item">识字</div>
+                    <div class="dropdown-item">计算</div>
+                    <div class="dropdown-item">函数</div>
+                    <div class="dropdown-item">几何</div>
+                    <div class="dropdown-item">代数</div>
+                    <div class="dropdown-item">概率统计</div>
+                    <div class="dropdown-item">数列</div>
+                </div>
+            </div>
+            <div>
+                <label>分值</label>
+                <input type="number" class="form-control weakness-score-total" placeholder="分值" min="0" step="0.5">
+            </div>
+            <div>
+                <label>得分</label>
+                <input type="number" class="form-control weakness-score-actual" placeholder="得分" min="0" step="0.5">
+            </div>
+            <div>
+                <label>丢分率</label>
+                <input type="text" class="form-control weakness-loss-rate" placeholder="丢分率" readonly>
+            </div>
+            <div>
+                <button type="button" class="btn btn-danger remove-weakness-btn" style="margin-top: 24px;">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 10px;">
+            <label>总结</label>
+            <textarea class="form-control weakness-summary" placeholder="总结" rows="3" style="resize: vertical;"></textarea>
+        </div>
+    </div>
+</div>
+
+            <div class="form-actions">
+                <button class="btn btn-secondary" id="cancelScoreBtn">取消</button>
+                <button class="btn btn-primary" id="saveScoreBtn">保存成绩</button>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+ <div class="modal" id="cardVisibilityModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-cog"></i> 统计卡片显示和隐藏设置</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="visibility-options">
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleStudyTime" checked>
+                    <label for="toggleStudyTime">今日学习时长</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleSportsTime" checked>
+                    <label for="toggleSportsTime">今日运动时长</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleTaskCount" checked>
+                    <label for="toggleTaskCount">任务完成数</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleCompletionRate" checked>
+                    <label for="toggleCompletionRate">今日任务完成率</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleStatsChart" checked>
+                    <label for="toggleStatsChart">图表统计</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleBadgeWall" checked>
+                    <label for="toggleBadgeWall">成就徽章墙</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="toggleScoreStats" checked>
+                    <label for="toggleScoreStats">成绩统计分析</label>
+                </div>
+                <div class="visibility-option">
+                    <input type="checkbox" id="togglePointsExchange" checked>
+                    <label for="togglePointsExchange">积分兑换站</label>
+                </div>
+
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="cancelCardVisibility">取消</button>
+            <button class="btn btn-primary" id="saveCardVisibility">保存</button>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="modal" id="parentPasswordModal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+            <h3><i class="fas fa-key"></i>家长密码设置</h3>
+            <button class="close-modal" id="closeParentPasswordModal">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label for="parentPasswordInput">设置家长密码：</label>
+                <input type="password" id="parentPasswordInput" class="form-control" placeholder="请输入 4-8 位数字或字母作为家长密码">
+            </div>
+            <div class="form-group">
+                <label for="confirmParentPasswordInput">确认家长密码：</label>
+                <input type="password" id="confirmParentPasswordInput" class="form-control" placeholder="请再次输入家长密码">
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h4 style="margin-bottom: 15px; color: var(--primary);">操作权限设置</h4>
+                <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 15px;">开启以下开关后，对应操作将需要验证家长密码：</p>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">删除历史未完成任务</div>
+                    <label class="switch">
+                        <input type="checkbox" id="deleteHistoricalTaskSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">删除任务</div>
+                    <label class="switch">
+                        <input type="checkbox" id="deleteTaskSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">编辑任务</div>
+                    <label class="switch">
+                        <input type="checkbox" id="editTaskSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">添加勋章</div>
+                    <label class="switch">
+                        <input type="checkbox" id="addBadgeSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">编辑勋章</div>
+                    <label class="switch">
+                        <input type="checkbox" id="editBadgeSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+
+                <div class="password-control-item">
+                    <div class="password-control-label">删除勋章</div>
+                    <label class="switch">
+                        <input type="checkbox" id="deleteBadgeSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">清空勋章</div>
+                    <label class="switch">
+                        <input type="checkbox" id="clearBadgesSwitch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">清空学习计划</div>
+                    <label class="switch">
+                        <input type="checkbox" id="clearStudyPlanSwitch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">添加奖励</div>
+                    <label class="switch">
+                        <input type="checkbox" id="addRewardSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">编辑奖励</div>
+                    <label class="switch">
+                        <input type="checkbox" id="editRewardSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="password-control-item">
+                    <div class="password-control-label">删除奖励</div>
+                    <label class="switch">
+                        <input type="checkbox" id="deleteRewardSwitch">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>    <div class="password-control-item">
+                    <div class="password-control-label">清空积分记录</div>
+                    <label class="switch">
+                        <input type="checkbox" id="clearPointsRecordsSwitch" checked>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+        </div>
+        <div class="form-actions">
+            <button class="btn btn-secondary" id="cancelParentPasswordBtn">取消</button>
+            <button class="btn btn-primary" id="saveParentPasswordBtn">保存设置</button>
+        </div>
+    </div>
+</div>
+
+<script>
+  (function () {
+    function ensureThemeMenuItem() {
+      var menu = document.getElementById('accountMenu');
+      var hiddenSelect = document.getElementById('themeSelect');
+      if (!menu || !hiddenSelect) return;
+
+      var item = document.getElementById('themeMenuItem');
+      if (!item) {
+        item = document.createElement('li');
+        item.id = 'themeMenuItem';
+        item.className = 'theme-menu-item';
+        item.innerHTML =
+          '<div class="theme-menu-row">' +
+            '<label for="themeSelectMenu"><i class="fas fa-palette"></i> 主题</label>' +
+            '<select id="themeSelectMenu" aria-label="选择页面主题"></select>' +
+          '</div>';
+      }
+
+      var menuSelect = item.querySelector('#themeSelectMenu');
+      if (!menuSelect) return;
+
+      if (menuSelect.options.length === 0) {
+        Array.prototype.forEach.call(hiddenSelect.options, function (opt) {
+          var next = document.createElement('option');
+          next.value = opt.value;
+          next.textContent = opt.textContent;
+          menuSelect.appendChild(next);
+        });
+      }
+
+      if (!menu.contains(item)) {
+        var firstDivider = menu.querySelector('hr');
+        if (firstDivider) {
+          menu.insertBefore(item, firstDivider);
+        } else {
+          menu.prepend(item);
+        } 
+      }
+
+      menuSelect.value = hiddenSelect.value || localStorage.getItem('banxuexing_theme') || 'classic';
+
+      if (menuSelect.dataset.bound !== '1') {
+        menuSelect.dataset.bound = '1';
+        menuSelect.addEventListener('change', function () {
+          hiddenSelect.value = menuSelect.value;
+          hiddenSelect.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+      }
+    }
+
+    function bindThemeMenuInteractions() {
+      var item = document.getElementById('themeMenuItem');
+      if (!item || item.dataset.bound === '1') return;
+      item.dataset.bound = '1';
+
+      ['click', 'mousedown', 'mouseup', 'touchstart'].forEach(function (evt) {
+        item.addEventListener(evt, function (e) {
+          e.stopPropagation();
+        });
+      });
+    }
+
+    function initThemeMenuMount() {
+      ensureThemeMenuItem();
+      bindThemeMenuInteractions();
+
+      var menu = document.getElementById('accountMenu');
+      if (!menu) return;
+
+      var observer = new MutationObserver(function () {
+        ensureThemeMenuItem();
+        bindThemeMenuInteractions();
+      });
+      observer.observe(menu, { childList: true, subtree: true });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initThemeMenuMount);
+    } else {
+      initThemeMenuMount();
+    }
+  })();
+</script>
+<script>
+  (function () {
+    function replaceName(root) {
+      if (!root) return;
+      if (root.nodeType === 3) {
+        if (root.nodeValue && root.nodeValue.indexOf('师老帅') !== -1) {
+          root.nodeValue = root.nodeValue.replaceAll('师老帅', '沐沐');
+        }
+        return;
+      }
+      if (root.nodeType !== 1) return;
+      if (root.childNodes && root.childNodes.length) {
+        root.childNodes.forEach(replaceName);
+      }
+    }
+
+    function runReplace() {
+      replaceName(document.body);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runReplace);
+    } else {
+      runReplace();
+    }
+
+    var observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        if (m.type === 'childList') {
+          m.addedNodes.forEach(replaceName);
+        } else if (m.type === 'characterData') {
+          replaceName(m.target);
+        }
+      });
+    });
+
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      characterData: true
+    });
+  })();
+</script>
+<script src="script1.js"></script>
+<script src="theme-switcher.js"></script>
+<audio id="successSound" preload="auto">
+    <source src="success.wav" type="audio/wav">
+    您的浏览器不支持音频播放。
+</audio>
+</body>
+</html>
+
+
+

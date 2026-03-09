@@ -1,0 +1,60 @@
+﻿# 伴学星网页项目
+
+本项目采用原版完整功能链路运行，已统一品牌文案为“伴学星”，并新增可切换页面主题功能。
+
+## 当前运行入口与依赖
+
+- `index.html`
+- `style.css`
+- `script1.js`
+- `theme-switcher.css`
+- `theme-switcher.js`
+- `chart.min.js`
+- `chartjs-plugin-datalabels.min.js`
+- `success.wav`
+
+## 本地运行
+
+在项目根目录执行：
+
+```powershell
+python -m http.server 5500
+```
+
+访问：`http://localhost:5500`
+
+## 主题切换
+
+- 页面右上角新增“主题”下拉框
+- 可选主题：`经典蓝`、`海洋青`、`森林绿`、`日落橙`
+- 主题选择会保存到浏览器 `localStorage`（键名：`banxuexing_theme`）
+
+## 线上部署（静态站）
+
+建议使用 Nginx 托管静态文件，站点根目录指向本项目目录即可。
+
+示例核心配置：
+
+```nginx
+server {
+    listen 80;
+    server_name banxuexing123.cn www.banxuexing123.cn;
+
+    root /var/www/banxuexing;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+## 文件说明
+
+- `source_index.html`：历史抓取快照（保留）
+- `README.md`：项目说明文档
+
+## 说明
+
+- 本项目数据主要保存在浏览器 `localStorage`。
+- 现阶段不改核心业务逻辑与数据结构，仅做品牌收敛、文件清理和主题扩展。

@@ -1,0 +1,177 @@
+﻿/* Theme switcher UI */
+.theme-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+  flex: 0 0 auto;
+}
+
+.theme-controls label {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+#themeSelect {
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  padding: 0 10px;
+  outline: none;
+}
+
+#themeSelect option {
+  color: #111;
+  background: #fff;
+}
+
+/* Theme palettes by overriding root vars already used by the site */
+body[data-theme="classic"] {
+  --primary: #4b6cb7;
+  --secondary: #182848;
+  --success: #4CAF50;
+  --warning: #FF9800;
+  --danger: #F44336;
+  --light-bg: #f5f7fa;
+  --card-bg: #ffffff;
+  --text: #333;
+  --text-light: #666;
+  --border: #e1e8ed;
+  --date-bg: #e3f0ff;
+  --today-bg: #e6f0ff;
+  --selected-bg: #fff9e6;
+}
+
+body[data-theme="ocean"] {
+  --primary: #147a9b;
+  --secondary: #0d3b4f;
+  --success: #1ea97c;
+  --warning: #f39c12;
+  --danger: #e74c3c;
+  --light-bg: #e8f6fb;
+  --card-bg: #ffffff;
+  --text: #173645;
+  --text-light: #4d6d79;
+  --border: #c9e3ee;
+  --date-bg: #dff3fb;
+  --today-bg: #d7eef8;
+  --selected-bg: #fff2cf;
+}
+
+body[data-theme="forest"] {
+  --primary: #2e7d32;
+  --secondary: #1b4332;
+  --success: #43a047;
+  --warning: #f9a825;
+  --danger: #d32f2f;
+  --light-bg: #edf7ef;
+  --card-bg: #ffffff;
+  --text: #22352a;
+  --text-light: #5d7364;
+  --border: #d5e6d8;
+  --date-bg: #e4f1e6;
+  --today-bg: #d8ebdc;
+  --selected-bg: #fff4d5;
+}
+
+body[data-theme="sunset"] {
+  --primary: #d35400;
+  --secondary: #6a1b4d;
+  --success: #2e7d32;
+  --warning: #ffb300;
+  --danger: #c62828;
+  --light-bg: #fff1e8;
+  --card-bg: #ffffff;
+  --text: #452d2d;
+  --text-light: #7c5b5b;
+  --border: #f3d8c6;
+  --date-bg: #ffe8d9;
+  --today-bg: #ffe1cc;
+  --selected-bg: #fff5dd;
+}
+
+/* a few explicit places using fixed colors */
+body[data-theme] .sort-btn,
+body[data-theme] .nav-btn,
+body[data-theme] .add-task-main-btn,
+body[data-theme] .account-trigger {
+  background: var(--primary) !important;
+}
+
+body[data-theme] .today-btn {
+  background: var(--warning) !important;
+}
+
+@media (max-width: 768px) {
+  .theme-controls {
+    margin-right: 8px;
+    gap: 6px;
+  }
+
+  #themeSelect {
+    width: 96px;
+    padding: 0 6px;
+  }
+}
+
+/* Theme switcher inside account dropdown */
+.theme-menu-item {
+  cursor: default !important;
+  padding: 8px 10px !important;
+}
+
+.theme-menu-item:hover {
+  background: #fff !important;
+}
+
+.theme-menu-item .theme-controls {
+  margin-right: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.theme-menu-item .theme-controls label {
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.theme-menu-item #themeSelect {
+  height: 30px;
+  min-width: 94px;
+  border-radius: 6px;
+  border: 1px solid #d8dee8;
+  background: #f7f9fc;
+  color: #333;
+  padding: 0 8px;
+}
+
+.theme-menu-item .theme-menu-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.theme-menu-item .theme-menu-row label {
+  color: #333;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.theme-menu-item #themeSelectMenu {
+  height: 30px;
+  min-width: 94px;
+  border-radius: 6px;
+  border: 1px solid #d8dee8;
+  background: #f7f9fc;
+  color: #333;
+  padding: 0 8px;
+  outline: none;
+}

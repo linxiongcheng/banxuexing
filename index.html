@@ -2251,8 +2251,33 @@
     });
   })();
 </script>
-<script src="script1.js"></script>
-<script src="theme-switcher.js"></script>
+<script src="supabase-config.js"></script>
+<script src="supabase-storage.js"></script>
+<script>
+  (function () {
+    function loadScript(src, callback) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = function () {
+        if (typeof callback === 'function') callback();
+      };
+      document.body.appendChild(s);
+    }
+
+    function bootApp() {
+      loadScript('script1.js', function () {
+        loadScript('theme-switcher.js');
+      });
+    }
+
+    if (window.__SUPABASE_STORAGE_READY__) {
+      bootApp();
+      return;
+    }
+
+    document.addEventListener('supabase-storage-ready', bootApp, { once: true });
+  })();
+</script>
 <audio id="successSound" preload="auto">
     <source src="success.wav" type="audio/wav">
     您的浏览器不支持音频播放。

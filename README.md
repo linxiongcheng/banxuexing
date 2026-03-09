@@ -1,6 +1,7 @@
 ﻿# 伴学星网页项目
 
 本项目采用原版完整功能链路运行，已统一品牌文案为“伴学星”，并新增可切换页面主题功能。
+当前版本已改为通过 Supabase 存储业务数据（不再使用浏览器本地 `localStorage` 持久化）。
 
 ## 当前运行入口与依赖
 
@@ -9,6 +10,8 @@
 - `script1.js`
 - `theme-switcher.css`
 - `theme-switcher.js`
+- `supabase-config.js`
+- `supabase-storage.js`
 - `chart.min.js`
 - `chartjs-plugin-datalabels.min.js`
 - `success.wav`
@@ -23,11 +26,55 @@ python -m http.server 5500
 
 访问：`http://localhost:5500`
 
+## Supabase 配置（必做）
+
+1. 在 Supabase SQL Editor 执行以下建表 SQL：
+
+```sql
+create table if not exists public.app_storage (
+  namespace text not null,
+  key text not null,
+  value text,
+  updated_at timestamptz not null default now(),
+  primary key (namespace, key)
+);
+```
+
+2. 执行 RLS 策略（演示环境可先全开放，生产建议按用户收紧）：
+
+```sql
+alter table public.app_storage enable row level security;
+
+create policy "anon read app_storage"
+on public.app_storage
+for select
+to anon
+using (true);
+
+create policy "anon write app_storage"
+on public.app_storage
+for all
+to anon
+using (true)
+with check (true);
+```
+
+3. 编辑 `supabase-config.js`：
+
+```js
+window.__SUPABASE_CONFIG__ = {
+  url: 'https://<your-project>.supabase.co',
+  anonKey: '<your-anon-key>',
+  table: 'app_storage',
+  namespace: 'banxuexing'
+};
+```
+
 ## 主题切换
 
-- 页面右上角新增“主题”下拉框
+- 主题切换在“账户下拉菜单”中
 - 可选主题：`经典蓝`、`海洋青`、`森林绿`、`日落橙`
-- 主题选择会保存到浏览器 `localStorage`（键名：`banxuexing_theme`）
+- 主题选择会同步到 Supabase 存储
 
 ## 线上部署（静态站）
 
@@ -56,5 +103,5 @@ server {
 
 ## 说明
 
-- 本项目数据主要保存在浏览器 `localStorage`。
-- 现阶段不改核心业务逻辑与数据结构，仅做品牌收敛、文件清理和主题扩展。
+- 项目保留了原有业务逻辑与数据结构访问方式，底层存储由 `supabase-storage.js` 接管到 Supabase。
+- `supabase-config.js` 中如未配置 `url/anonKey`，页面会提示并阻止正常数据加载。

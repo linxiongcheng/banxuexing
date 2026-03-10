@@ -2279,6 +2279,55 @@
 </script>
 <script>
     (function () {
+        function bindConfirmReplaceTime() {
+            var btn = document.getElementById('confirmReplaceTimeBtn');
+            if (!btn || btn.dataset.replaceBound === '1') return;
+            btn.dataset.replaceBound = '1';
+
+            btn.addEventListener('click', function () {
+                // Let original script1.js click logic run first.
+                setTimeout(function () {
+                    var modal = document.getElementById('confirmReplaceTimeModal');
+                    if (!modal) return;
+
+                    var stillOpen = window.getComputedStyle(modal).display !== 'none';
+                    if (!stillOpen) return;
+
+                    try {
+                        if (typeof window.applyManualTime === 'function') {
+                            window.applyManualTime();
+                            if (typeof window.saveData === 'function') window.saveData();
+                            if (typeof window.renderTasks === 'function') window.renderTasks();
+                            if (typeof window.updateStats === 'function') window.updateStats();
+                            if (typeof window.updateSubTitle === 'function') window.updateSubTitle();
+
+                            modal.style.display = 'none';
+                            var manualModal = document.getElementById('manualTimeModal');
+                            if (manualModal) manualModal.style.display = 'none';
+                            return;
+                        }
+                    } catch (err) {
+                        console.error('[confirmReplaceTime] fallback applyManualTime failed', err);
+                    }
+
+                    var showAlertFn = window.showAlert || function (t, msg) { alert(t + '\n' + msg); };
+                    showAlertFn('提示', '替换实际用时暂不可用，请重试或刷新页面。');
+                }, 180);
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindConfirmReplaceTime, { once: true });
+        } else {
+            bindConfirmReplaceTime();
+        }
+
+        // bind again after dynamic app boot
+        document.addEventListener('supabase-storage-ready', function () { setTimeout(bindConfirmReplaceTime, 0); }, { once: true });
+    })();
+</script>
+<script>
+    (function () {
         function runIfFn(name) {
             try {
                 if (typeof window[name] === 'function') {

@@ -626,7 +626,7 @@
 </div>
 
 <footer>
-    <p>伴学星 - 每天进步一点点</p>
+    <p>伴学星 - 每天进步一点点 | 由小红书博主“沐沐”原创制作</p>
 </footer>
 </div>
 
@@ -2274,6 +2274,63 @@
         // script1.js may be loaded later; bind once again after app boot.
         document.addEventListener('supabase-storage-ready', function () {
             setTimeout(bindConfirmClearButton, 0);
+        }, { once: true });
+    })();
+</script>
+<script>
+    (function () {
+        function runIfFn(name) {
+            try {
+                if (typeof window[name] === 'function') {
+                    window[name]();
+                    return true;
+                }
+            } catch (err) {
+                console.warn('[task-save-refresh] call failed:', name, err);
+            }
+            return false;
+        }
+
+        function refreshHomeAfterSave() {
+            // Keep this list ordered from task UI to summary/stats UI.
+            var calledAny = false;
+            calledAny = runIfFn('renderTasks') || calledAny;
+            calledAny = runIfFn('renderWeekDays') || calledAny;
+            calledAny = runIfFn('renderMonthCalendar') || calledAny;
+            calledAny = runIfFn('updateStats') || calledAny;
+            calledAny = runIfFn('updateSubTitle') || calledAny;
+
+            // If app internals changed and no function is callable, fallback to reload.
+            if (!calledAny) {
+                window.location.reload();
+            }
+        }
+
+        function bindSaveRefreshFallback() {
+            var saveBtn = document.getElementById('saveTaskBtn');
+            if (!saveBtn || saveBtn.dataset.refreshBound === '1') return;
+
+            saveBtn.dataset.refreshBound = '1';
+            saveBtn.addEventListener('click', function () {
+                // Allow original save flow to complete first.
+                setTimeout(function () {
+                    var taskModal = document.getElementById('taskModal');
+                    if (!taskModal) return;
+                    var hidden = window.getComputedStyle(taskModal).display === 'none';
+                    if (hidden) refreshHomeAfterSave();
+                }, 350);
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindSaveRefreshFallback, { once: true });
+        } else {
+            bindSaveRefreshFallback();
+        }
+
+        // script1.js is dynamically loaded, so bind again after storage-ready boot path.
+        document.addEventListener('supabase-storage-ready', function () {
+            setTimeout(bindSaveRefreshFallback, 0);
         }, { once: true });
     })();
 </script>

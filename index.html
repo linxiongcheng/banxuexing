@@ -2230,6 +2230,53 @@
         }, { once: true });
   })();
 </script>
+<script>
+    (function () {
+        function clearStudyDataFallback() {
+            var accountId = localStorage.getItem('currentAccount') || 'default';
+            localStorage.setItem('tasks_' + accountId, JSON.stringify([]));
+            localStorage.setItem('timerStates_' + accountId, JSON.stringify({}));
+
+            var modal = document.getElementById('clearDataModal');
+            if (modal) modal.style.display = 'none';
+
+            window.location.reload();
+        }
+
+        function bindConfirmClearButton() {
+            var confirmBtn = document.getElementById('confirmClearBtn');
+            if (!confirmBtn || confirmBtn.dataset.fallbackBound === '1') return;
+
+            confirmBtn.dataset.fallbackBound = '1';
+            confirmBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+
+                try {
+                    if (typeof window.handleClearData === 'function') {
+                        window.handleClearData();
+                        return;
+                    }
+                } catch (err) {
+                    console.error('[clear-data] handleClearData failed, using fallback:', err);
+                }
+
+                clearStudyDataFallback();
+            }, true);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindConfirmClearButton, { once: true });
+        } else {
+            bindConfirmClearButton();
+        }
+
+        // script1.js may be loaded later; bind once again after app boot.
+        document.addEventListener('supabase-storage-ready', function () {
+            setTimeout(bindConfirmClearButton, 0);
+        }, { once: true });
+    })();
+</script>
 <audio id="successSound" preload="auto">
     <source src="success.wav" type="audio/wav">
     您的浏览器不支持音频播放。

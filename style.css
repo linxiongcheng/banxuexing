@@ -1163,22 +1163,6 @@
             background: #31b0d5;
         }
 
-        .export-btn {
-            background: var(--success);
-        }
-
-        .export-btn:hover {
-            background: #3d8b40;
-        }
-
-        .import-btn {
-            background: #aa66cc;
-        }
-
-        .import-btn:hover {
-            background: #9933cc;
-        }
-
         .clear-btn {
             background: var(--danger);
         }
@@ -1952,39 +1936,6 @@
             margin-left: 8px;
         }
 
-        .backup-tip {
-            color: #d97706;
-            font-weight: 500;
-            margin: 25px 0 15px;
-            font-size: 1.1rem;
-        }
-
-        .backup-btn {
-            background: linear-gradient(to bottom, #4b6cb7, #3a5795);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 14px 35px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(75, 108, 183, 0.4);
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .backup-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(75, 108, 183, 0.6);
-        }
-
-        .backup-btn i {
-            font-size: 1.2rem;
-        }
-
         .close-congrats {
             position: absolute;
             top: 20px;
@@ -2164,10 +2115,6 @@
                 font-size: 1rem;
             }
 
-            .backup-btn {
-                padding: 12px 25px;
-                font-size: 1.1rem;
-            }
         }
         
         .account-controls {
@@ -2672,47 +2619,6 @@
     }
 }
 
-
-.import-options {
-    margin: 20px 0;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 10px;
-    border-left: 4px solid #4b6cb7;
-}
-
-.import-option {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.import-option:last-child {
-    margin-bottom: 0;
-}
-
-.import-option input {
-    margin-right: 10px;
-}
-
-.import-option label {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-}
-
-.import-option i {
-    margin-right: 8px;
-    font-size: 1.2rem;
-    width: 24px;
-    text-align: center;
-}
-
-.option-description {
-    margin-left: 30px;
-    font-size: 0.9rem;
-    color: #6c757d;
-}
 
 .custom-dropdown {
     position: absolute;
@@ -5823,4 +5729,3 @@ input:checked + .slider:before {
     background-color: #fadbd8; 
     border: 1px solid #e2a7a3; 
 }
-

@@ -620,19 +620,13 @@
 </div>
 
 <div class="data-buttons">
-    <button class="data-btn export-btn" id="exportBtn">
-        <i class="fas fa-download" data-fallback="下"></i> 备份数据
-    </button>
-    <button class="data-btn import-btn" id="importBtn">
-        <i class="fas fa-upload" data-fallback="上"></i> 导入数据
-    </button>
     <button class="data-btn clear-btn" id="clearDataBtn">
         <i class="fas fa-trash" data-fallback="清"></i> 清空学习计划
     </button>
 </div>
 
 <footer>
-    <p>伴学星 - 每天进步一点点 | 由小红书博主“沐沐”原创制作 </p>
+    <p>伴学星 - 每天进步一点点</p>
 </footer>
 </div>
 
@@ -1382,47 +1376,6 @@
             <p>运动户外时间: <span id="congratsSportsTime"></span></p>
             <p>计划任务数量: <span id="congratsTotalTasks"></span>个</p>
             <p>完成率: <span id="congratsCompletionRate">100%</span></p>
-        </div>
-        <p class="backup-tip">为避免数据丢失，建议你立即备份数据</p>
-        <button class="backup-btn" id="congratsBackupBtn">
-            <i class="fas fa-download"></i> 备份数据
-        </button>
-    </div>
-</div>
-
-
-<div class="confirmation-modal" id="importConfirmModal">
-    <div class="confirmation-content">
-        <div class="confirmation-body">
-            <h3><i class="fas fa-file-import" style="color: #4b6cb7; font-size: 48px; margin-bottom: 20px;"></i></h3>
-            <h3>选择导入方式</h3>
-            <p style="margin: 15px 0;">请选择数据导入方式：</p>
-
-            <div class="import-options">
-                <div class="import-option">
-                    <input type="radio" id="importOverwrite" name="importOption" value="overwrite">
-                    <label for="importOverwrite">
-                        <i class="fas fa-sync-alt" style="color: #e74c3c;"></i> 覆盖导入
-                    </label>
-                </div>
-                <div class="option-description">
-                    清除当前所有数据（包括分类、任务模板、计划和计时器），替换为新的数据！
-                </div>
-
-                <div class="import-option">
-                    <input type="radio" id="importAppend" name="importOption" value="append" checked>
-                    <label for="importAppend">
-                        <i class="fas fa-plus-circle" style="color: #27ae60;"></i> 追加导入
-                    </label>
-                </div>
-                <div class="option-description">
-                    保留当前数据并添加新数据，重复数据不会添加！
-                </div>
-            </div>
-        </div>
-        <div class="confirmation-actions">
-            <button class="btn btn-secondary" id="importCancelBtn">取消</button>
-            <button class="btn btn-primary" id="importConfirmBtn">确认导入</button>
         </div>
     </div>
 </div>
@@ -2208,49 +2161,6 @@
     }
   })();
 </script>
-<script>
-  (function () {
-    function replaceName(root) {
-      if (!root) return;
-      if (root.nodeType === 3) {
-        if (root.nodeValue && root.nodeValue.indexOf('师老帅') !== -1) {
-          root.nodeValue = root.nodeValue.replaceAll('师老帅', '沐沐');
-        }
-        return;
-      }
-      if (root.nodeType !== 1) return;
-      if (root.childNodes && root.childNodes.length) {
-        root.childNodes.forEach(replaceName);
-      }
-    }
-
-    function runReplace() {
-      replaceName(document.body);
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', runReplace);
-    } else {
-      runReplace();
-    }
-
-    var observer = new MutationObserver(function (mutations) {
-      mutations.forEach(function (m) {
-        if (m.type === 'childList') {
-          m.addedNodes.forEach(replaceName);
-        } else if (m.type === 'characterData') {
-          replaceName(m.target);
-        }
-      });
-    });
-
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      characterData: true
-    });
-  })();
-</script>
 <script src="supabase-config.js"></script>
 <script src="supabase-storage.js"></script>
 <script>
@@ -2326,6 +2236,3 @@
 </audio>
 </body>
 </html>
-
-
-

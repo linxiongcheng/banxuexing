@@ -2960,13 +2960,11 @@
             if (!trigger) return false;
             var idText = String(trigger.id || '').toLowerCase();
             var clsText = String(trigger.className || '').toLowerCase();
-            var text = String(trigger.textContent || '').replace(/\s+/g, '');
+            var actionText = String(trigger.getAttribute('data-action') || '').toLowerCase();
 
             if (idText.indexOf('template') >= 0 && idText.indexOf('manage') >= 0) return true;
             if (clsText.indexOf('template') >= 0 && clsText.indexOf('manage') >= 0) return true;
-            if (text.indexOf('计划模板管理') >= 0 || text.indexOf('模板管理') >= 0) return true;
-            if (text.indexOf('计划模版管理') >= 0 || text.indexOf('模版管理') >= 0) return true;
-            if ((text.indexOf('模板') >= 0 || text.indexOf('模版') >= 0) && text.indexOf('管理') >= 0) return true;
+            if (actionText === 'manage-template' || actionText === 'template-manager') return true;
             return false;
         }
 

@@ -2904,6 +2904,97 @@
         }, { once: true });
     })();
 </script>
+<script>
+    (function () {
+        function isShown(element) {
+            if (!element) return false;
+            return window.getComputedStyle(element).display !== 'none';
+        }
+
+        function fillTemplateCategoryFromTaskCategory() {
+            var taskCategory = document.getElementById('taskCategory');
+            var templateCategory = document.getElementById('templateCategory');
+            if (!taskCategory || !templateCategory) return;
+            if (templateCategory.options.length > 0) return;
+
+            var optionsHtml = '';
+            Array.prototype.forEach.call(taskCategory.options, function (opt) {
+                var value = String(opt.value || '');
+                var text = String(opt.textContent || '').trim();
+                if (!value || !text) return;
+                optionsHtml += '<option value="' + value.replace(/"/g, '&quot;') + '">' + text + '</option>';
+            });
+            if (optionsHtml) templateCategory.innerHTML = optionsHtml;
+        }
+
+        function openTemplateModalFallback() {
+            var templateModal = document.getElementById('templateModal');
+            if (!templateModal) return false;
+
+            fillTemplateCategoryFromTaskCategory();
+            templateModal.style.display = 'flex';
+            var title = document.getElementById('templateModalTitle');
+            if (title && !title.textContent) title.textContent = '计划模板管理';
+            return true;
+        }
+
+        function tryOpenByKnownFunctions() {
+            var fns = ['showTemplateManager', 'openTemplateManager', 'showTemplateModal', 'openTemplateModal'];
+            for (var i = 0; i < fns.length; i++) {
+                var fn = window[fns[i]];
+                if (typeof fn === 'function') {
+                    try {
+                        fn();
+                        return true;
+                    } catch (err) {
+                        console.warn('[template-manage-fallback] function failed:', fns[i], err);
+                    }
+                }
+            }
+            return false;
+        }
+
+        function maybeTemplateManageTrigger(target) {
+            if (!target) return false;
+            var trigger = target.closest('button, a, li, div, span');
+            if (!trigger) return false;
+            var idText = String(trigger.id || '').toLowerCase();
+            var clsText = String(trigger.className || '').toLowerCase();
+            var text = String(trigger.textContent || '').replace(/\s+/g, '');
+
+            if (idText.indexOf('template') >= 0 && idText.indexOf('manage') >= 0) return true;
+            if (clsText.indexOf('template') >= 0 && clsText.indexOf('manage') >= 0) return true;
+            if (text.indexOf('计划模板管理') >= 0 || text.indexOf('模板管理') >= 0) return true;
+            return false;
+        }
+
+        function bindTemplateManageFallback() {
+            if (document.body.dataset.templateManageFallbackBound === '1') return;
+            document.body.dataset.templateManageFallbackBound = '1';
+
+            document.addEventListener('click', function (event) {
+                if (!maybeTemplateManageTrigger(event.target)) return;
+                var templateModal = document.getElementById('templateModal');
+
+                setTimeout(function () {
+                    if (isShown(templateModal)) return;
+                    if (tryOpenByKnownFunctions()) return;
+                    openTemplateModalFallback();
+                }, 80);
+            }, false);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindTemplateManageFallback, { once: true });
+        } else {
+            bindTemplateManageFallback();
+        }
+
+        document.addEventListener('supabase-storage-ready', function () {
+            setTimeout(bindTemplateManageFallback, 0);
+        }, { once: true });
+    })();
+</script>
 <audio id="successSound" preload="auto">
     <source src="success.wav" type="audio/wav">
     您的浏览器不支持音频播放。

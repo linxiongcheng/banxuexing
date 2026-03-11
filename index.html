@@ -2279,22 +2279,55 @@
 </script>
 <script>
     (function () {
+        function getRuntimeTaskList() {
+            var list = null;
+            try {
+                if (typeof tasks !== 'undefined' && Array.isArray(tasks)) list = tasks;
+            } catch (err) {}
+            if (!list && Array.isArray(window.tasks)) list = window.tasks;
+            return list;
+        }
+
+        function getRuntimeTimerStates() {
+            var map = null;
+            try {
+                if (typeof timerStates !== 'undefined' && timerStates && typeof timerStates === 'object') map = timerStates;
+            } catch (err) {}
+            if (!map && window.timerStates && typeof window.timerStates === 'object') map = window.timerStates;
+            return map;
+        }
+
+        function pushCandidate(candidates, value) {
+            if (value === undefined || value === null || value === '') return;
+            candidates.push(value);
+        }
+
         function findManualTaskId(tasks) {
             var candidates = [];
-            var globals = [
-                window.currentTaskId,
-                window.selectedTaskId,
-                window.editingTaskId,
-                window.manualTaskId,
-                window.currentManualTaskId,
-                window.taskIdForManualTime,
-                window.currentTaskIdForSummary,
-                window.activeTimerId
-            ];
-            candidates = candidates.concat(globals);
+            var states = getRuntimeTimerStates();
+
+            pushCandidate(candidates, window.currentTaskId);
+            pushCandidate(candidates, window.selectedTaskId);
+            pushCandidate(candidates, window.editingTaskId);
+            pushCandidate(candidates, window.manualTaskId);
+            pushCandidate(candidates, window.currentManualTaskId);
+            pushCandidate(candidates, window.taskIdForManualTime);
+            pushCandidate(candidates, window.currentTaskIdForSummary);
+            pushCandidate(candidates, window.activeTimerId);
+
+            try { pushCandidate(candidates, (typeof currentTaskId !== 'undefined' ? currentTaskId : undefined)); } catch (err) {}
+            try { pushCandidate(candidates, (typeof selectedTaskId !== 'undefined' ? selectedTaskId : undefined)); } catch (err) {}
+            try { pushCandidate(candidates, (typeof editingTaskId !== 'undefined' ? editingTaskId : undefined)); } catch (err) {}
+            try { pushCandidate(candidates, (typeof manualTaskId !== 'undefined' ? manualTaskId : undefined)); } catch (err) {}
+            try { pushCandidate(candidates, (typeof currentManualTaskId !== 'undefined' ? currentManualTaskId : undefined)); } catch (err) {}
+            try { pushCandidate(candidates, (typeof taskIdForManualTime !== 'undefined' ? taskIdForManualTime : undefined)); } catch (err) {}
+            try { pushCandidate(candidates, (typeof activeTimerId !== 'undefined' ? activeTimerId : undefined)); } catch (err) {}
 
             var editingTaskInput = document.getElementById('editingTaskId');
             if (editingTaskInput) candidates.push(editingTaskInput.value);
+
+            var summaryTaskInput = document.getElementById('currentTaskIdForSummary');
+            if (summaryTaskInput) candidates.push(summaryTaskInput.value);
 
             ['manualTimeModal', 'confirmReplaceTimeModal', 'confirmReplaceTimeBtn', 'confirmManualTimeBtn'].forEach(function (id) {
                 var el = document.getElementById(id);
@@ -2308,10 +2341,14 @@
                 candidates.push(el.getAttribute('data-id'));
             });
 
-            if (window.timerStates && typeof window.timerStates === 'object') {
-                Object.keys(window.timerStates).forEach(function (key) {
-                    var state = window.timerStates[key];
+            if (states) {
+                Object.keys(states).forEach(function (key) {
+                    var state = states[key];
                     if (state && state.isRunning) candidates.push(key);
+                });
+                Object.keys(states).forEach(function (key) {
+                    var state = states[key];
+                    if (state && (state.isPaused || (Number(state.elapsedTime) || 0) > 0)) candidates.push(key);
                 });
             }
 
@@ -2332,7 +2369,8 @@
                 var durationInput = document.getElementById('manualDuration');
                 var startInput = document.getElementById('manualStartTime');
                 var endInput = document.getElementById('manualEndTime');
-                var tasks = Array.isArray(window.tasks) ? window.tasks : null;
+                var tasks = getRuntimeTaskList();
+                var states = getRuntimeTimerStates();
 
                 if (!tasks || tasks.length === 0) {
                     throw new Error('tasks unavailable');
@@ -2368,15 +2406,17 @@
                 task.actualEnd = endTime;
                 task.actualEndTime = endTime;
 
-                if (window.timerStates && window.timerStates[taskId]) {
-                    window.timerStates[taskId].elapsedTime = durationSeconds;
-                    window.timerStates[taskId].isRunning = false;
-                    window.timerStates[taskId].isPaused = false;
-                    if (window.timerStates[taskId].timerInterval) {
-                        clearInterval(window.timerStates[taskId].timerInterval);
-                        window.timerStates[taskId].timerInterval = null;
+                if (states && states[taskId]) {
+                    states[taskId].elapsedTime = durationSeconds;
+                    states[taskId].isRunning = false;
+                    states[taskId].isPaused = false;
+                    if (states[taskId].timerInterval) {
+                        clearInterval(states[taskId].timerInterval);
+                        states[taskId].timerInterval = null;
                     }
                 }
+
+                return true;
             };
         }
 

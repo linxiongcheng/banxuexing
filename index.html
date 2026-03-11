@@ -2279,7 +2279,110 @@
 </script>
 <script>
     (function () {
+        function findManualTaskId(tasks) {
+            var candidates = [];
+            var globals = [
+                window.currentTaskId,
+                window.selectedTaskId,
+                window.editingTaskId,
+                window.manualTaskId,
+                window.currentManualTaskId,
+                window.taskIdForManualTime,
+                window.currentTaskIdForSummary,
+                window.activeTimerId
+            ];
+            candidates = candidates.concat(globals);
+
+            var editingTaskInput = document.getElementById('editingTaskId');
+            if (editingTaskInput) candidates.push(editingTaskInput.value);
+
+            ['manualTimeModal', 'confirmReplaceTimeModal', 'confirmReplaceTimeBtn', 'confirmManualTimeBtn'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                if (el.dataset) {
+                    candidates.push(el.dataset.taskId);
+                    candidates.push(el.dataset.id);
+                    candidates.push(el.dataset.currentTaskId);
+                }
+                candidates.push(el.getAttribute('data-task-id'));
+                candidates.push(el.getAttribute('data-id'));
+            });
+
+            if (window.timerStates && typeof window.timerStates === 'object') {
+                Object.keys(window.timerStates).forEach(function (key) {
+                    var state = window.timerStates[key];
+                    if (state && state.isRunning) candidates.push(key);
+                });
+            }
+
+            for (var i = 0; i < candidates.length; i++) {
+                var parsed = parseInt(candidates[i], 10);
+                if (!Number.isFinite(parsed)) continue;
+                var found = tasks.find(function (task) { return Number(task.id) === parsed; });
+                if (found) return parsed;
+            }
+
+            return null;
+        }
+
+        function installApplyManualTimeFallback() {
+            if (typeof window.applyManualTime === 'function') return;
+
+            window.applyManualTime = function () {
+                var durationInput = document.getElementById('manualDuration');
+                var startInput = document.getElementById('manualStartTime');
+                var endInput = document.getElementById('manualEndTime');
+                var tasks = Array.isArray(window.tasks) ? window.tasks : null;
+
+                if (!tasks || tasks.length === 0) {
+                    throw new Error('tasks unavailable');
+                }
+
+                if (!durationInput || !startInput || !endInput) {
+                    throw new Error('manual time inputs unavailable');
+                }
+
+                var durationMinutes = Number(durationInput.value);
+                if (!Number.isFinite(durationMinutes) || durationMinutes <= 0) {
+                    throw new Error('invalid manual duration');
+                }
+
+                var taskId = findManualTaskId(tasks);
+                if (taskId === null) {
+                    throw new Error('cannot resolve task id for manual time');
+                }
+
+                var task = tasks.find(function (item) { return Number(item.id) === Number(taskId); });
+                if (!task) {
+                    throw new Error('task not found');
+                }
+
+                var durationSeconds = Math.round(durationMinutes * 60);
+                var startTime = (startInput.value || '').trim();
+                var endTime = (endInput.value || '').trim();
+
+                task.actualDuration = durationSeconds;
+                task.actualDurationMinutes = durationMinutes;
+                task.actualStart = startTime;
+                task.actualStartTime = startTime;
+                task.actualEnd = endTime;
+                task.actualEndTime = endTime;
+
+                if (window.timerStates && window.timerStates[taskId]) {
+                    window.timerStates[taskId].elapsedTime = durationSeconds;
+                    window.timerStates[taskId].isRunning = false;
+                    window.timerStates[taskId].isPaused = false;
+                    if (window.timerStates[taskId].timerInterval) {
+                        clearInterval(window.timerStates[taskId].timerInterval);
+                        window.timerStates[taskId].timerInterval = null;
+                    }
+                }
+            };
+        }
+
         function bindConfirmReplaceTime() {
+            installApplyManualTimeFallback();
+
             var btn = document.getElementById('confirmReplaceTimeBtn');
             if (!btn || btn.dataset.replaceBound === '1') return;
             btn.dataset.replaceBound = '1';
@@ -2312,7 +2415,7 @@
 
                     var showAlertFn = window.showAlert || function (t, msg) { alert(t + '\n' + msg); };
                     showAlertFn('提示', '替换实际用时暂不可用，请重试或刷新页面。');
-                }, 180);
+                }, 420);
             });
         }
 

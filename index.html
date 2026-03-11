@@ -2965,6 +2965,8 @@
             if (idText.indexOf('template') >= 0 && idText.indexOf('manage') >= 0) return true;
             if (clsText.indexOf('template') >= 0 && clsText.indexOf('manage') >= 0) return true;
             if (text.indexOf('计划模板管理') >= 0 || text.indexOf('模板管理') >= 0) return true;
+            if (text.indexOf('计划模版管理') >= 0 || text.indexOf('模版管理') >= 0) return true;
+            if ((text.indexOf('模板') >= 0 || text.indexOf('模版') >= 0) && text.indexOf('管理') >= 0) return true;
             return false;
         }
 
@@ -2992,6 +2994,36 @@
 
         document.addEventListener('supabase-storage-ready', function () {
             setTimeout(bindTemplateManageFallback, 0);
+        }, { once: true });
+    })();
+</script>
+<script>
+    (function () {
+        function bindSidebarTitleFallback() {
+            var sidebar = document.getElementById('sidebar');
+            var title = document.getElementById('sidebarTitle');
+            if (!sidebar || !title || title.dataset.sidebarToggleFallbackBound === '1') return;
+            title.dataset.sidebarToggleFallbackBound = '1';
+
+            title.addEventListener('click', function () {
+                var before = sidebar.classList.contains('collapsed');
+                setTimeout(function () {
+                    var after = sidebar.classList.contains('collapsed');
+                    if (after === before) {
+                        sidebar.classList.toggle('collapsed');
+                    }
+                }, 100);
+            }, false);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindSidebarTitleFallback, { once: true });
+        } else {
+            bindSidebarTitleFallback();
+        }
+
+        document.addEventListener('supabase-storage-ready', function () {
+            setTimeout(bindSidebarTitleFallback, 0);
         }, { once: true });
     })();
 </script>

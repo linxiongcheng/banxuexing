@@ -2526,6 +2526,384 @@
         }, { once: true });
     })();
 </script>
+<script>
+    (function () {
+        function safeParse(jsonText, fallback) {
+            try { return JSON.parse(jsonText); } catch (err) { return fallback; }
+        }
+
+        function getRuntimeTasks() {
+            var fromRuntime = null;
+            try {
+                if (typeof tasks !== 'undefined' && Array.isArray(tasks)) fromRuntime = tasks;
+            } catch (err) {}
+            if (!fromRuntime && Array.isArray(window.tasks)) fromRuntime = window.tasks;
+
+            var accountId = localStorage.getItem('currentAccount') || 'default';
+            var fromStorage = safeParse(localStorage.getItem('tasks_' + accountId) || '[]', []);
+            if (!Array.isArray(fromStorage)) fromStorage = [];
+
+            if (Array.isArray(fromRuntime) && fromRuntime.length >= fromStorage.length) return fromRuntime;
+            return fromStorage;
+        }
+
+        function getRuntimeCategories() {
+            var fromRuntime = null;
+            try {
+                if (typeof categories !== 'undefined' && Array.isArray(categories)) fromRuntime = categories;
+            } catch (err) {}
+            if (!fromRuntime && Array.isArray(window.categories)) fromRuntime = window.categories;
+
+            var accountId = localStorage.getItem('currentAccount') || 'default';
+            var fromStorage = safeParse(localStorage.getItem('categories_' + accountId) || '[]', []);
+            if (!Array.isArray(fromStorage)) fromStorage = [];
+
+            if (Array.isArray(fromRuntime) && fromRuntime.length >= fromStorage.length) return fromRuntime;
+            return fromStorage;
+        }
+
+        function asDateKey(value) {
+            if (!value && value !== 0) return '';
+            var text = String(value).trim();
+            var m = text.match(/^(\d{4})[-\/](\d{2})[-\/](\d{2})/);
+            if (m) return m[1] + '-' + m[2] + '-' + m[3];
+            if (/^\d{4}-\d{2}-\d{2}$/.test(text)) return text;
+            var dt = new Date(text);
+            if (Number.isNaN(dt.getTime())) return '';
+            return dt.toISOString().slice(0, 10);
+        }
+
+        function getTaskDate(task) {
+            var keys = ['date', 'taskDate', 'plannedDate', 'planDate', 'createdDate', 'startDate', 'createdAt'];
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var value = task[key];
+                var dateKey = asDateKey(value);
+                if (dateKey) return dateKey;
+            }
+            return '';
+        }
+
+        function getTaskCompletedDate(task) {
+            var keys = ['completedDate', 'completeDate', 'finishedDate', 'doneDate', 'actualDate', 'updatedAt'];
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var value = task[key];
+                var dateKey = asDateKey(value);
+                if (dateKey) return dateKey;
+            }
+            return getTaskDate(task);
+        }
+
+        function isTaskCompleted(task) {
+            if (!task || typeof task !== 'object') return false;
+            if (task.completed === true || task.isCompleted === true || task.done === true || task.finish === true) return true;
+            var status = String(task.status || task.state || '').toLowerCase();
+            return /completed|done|finished|success|已完成|完成/.test(status);
+        }
+
+        function getCategoryName(task, categories) {
+            var name = task.categoryName || task.category || task.subject || '';
+            if (name) return String(name);
+            var categoryId = Number(task.categoryId);
+            if (Number.isFinite(categoryId)) {
+                var match = categories.find(function (item) { return Number(item.id) === categoryId; });
+                if (match && match.name) return String(match.name);
+            }
+            return '未分类';
+        }
+
+        function getActualMinutes(task) {
+            var raw = Number(task.actualDuration);
+            if (!Number.isFinite(raw) || raw < 0) raw = Number(task.actualDurationMinutes);
+            if (!Number.isFinite(raw) || raw < 0) raw = 0;
+            if (raw > 480) return raw / 60;
+            return raw;
+        }
+
+        function getPlannedMinutes(task) {
+            var raw = Number(task.plannedDuration);
+            if (!Number.isFinite(raw) || raw < 0) raw = 0;
+            return raw;
+        }
+
+        function formatYmd(dateObj) {
+            var y = dateObj.getFullYear();
+            var m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            var d = String(dateObj.getDate()).padStart(2, '0');
+            return y + '-' + m + '-' + d;
+        }
+
+        function lastNDays(n) {
+            var out = [];
+            var now = new Date();
+            now.setHours(0, 0, 0, 0);
+            for (var i = n - 1; i >= 0; i--) {
+                var d = new Date(now);
+                d.setDate(now.getDate() - i);
+                out.push(formatYmd(d));
+            }
+            return out;
+        }
+
+        function computeStreak(completedDates) {
+            var set = new Set(completedDates.filter(Boolean));
+            if (set.size === 0) return 0;
+            var cursor = new Date();
+            cursor.setHours(0, 0, 0, 0);
+            var streak = 0;
+            while (set.has(formatYmd(cursor))) {
+                streak += 1;
+                cursor.setDate(cursor.getDate() - 1);
+            }
+            if (streak > 0) return streak;
+            var sorted = Array.from(set).sort();
+            var latest = sorted[sorted.length - 1];
+            return latest ? 1 : 0;
+        }
+
+        function updateSubtitleAndCards(tasks) {
+            var completedTasks = tasks.filter(isTaskCompleted);
+            var completedDates = completedTasks.map(getTaskCompletedDate);
+            var streak = computeStreak(completedDates);
+            var subDays = document.getElementById('subDays');
+            var subTasks = document.getElementById('subTasks');
+            if (subDays) subDays.textContent = String(streak);
+            if (subTasks) subTasks.textContent = String(completedTasks.length);
+
+            var today = formatYmd(new Date());
+            var todayTasks = tasks.filter(function (task) { return getTaskDate(task) === today; });
+            var todayCompleted = todayTasks.filter(isTaskCompleted).length;
+            var completionRate = todayTasks.length > 0 ? Math.round(todayCompleted * 100 / todayTasks.length) : 0;
+
+            var completedTasksEl = document.getElementById('completedTasks');
+            var completionRateEl = document.getElementById('completionRate');
+            var todayStudyTimeEl = document.getElementById('todayStudyTime');
+            var sportsTimeEl = document.getElementById('sportsTime');
+
+            var todayStudyMinutes = 0;
+            var todaySportsMinutes = 0;
+            tasks.forEach(function (task) {
+                if (getTaskDate(task) !== today && getTaskCompletedDate(task) !== today) return;
+                var minutes = getActualMinutes(task);
+                var categoryText = String(task.categoryName || task.category || task.subject || '').toLowerCase();
+                if (/运动|体育|锻炼|跑步|球|swim|sport/.test(categoryText)) {
+                    todaySportsMinutes += minutes;
+                } else {
+                    todayStudyMinutes += minutes;
+                }
+            });
+
+            if (completedTasksEl) completedTasksEl.textContent = todayCompleted + '/' + todayTasks.length;
+            if (completionRateEl) completionRateEl.textContent = completionRate + '%';
+            if (todayStudyTimeEl) todayStudyTimeEl.textContent = (todayStudyMinutes / 60).toFixed(1) + 'h';
+            if (sportsTimeEl) sportsTimeEl.textContent = (todaySportsMinutes / 60).toFixed(1) + 'h';
+        }
+
+        function getChartRegistry() {
+            if (!window.__statsFallbackCharts) window.__statsFallbackCharts = {};
+            return window.__statsFallbackCharts;
+        }
+
+        function renderChart(canvasId, config) {
+            if (typeof Chart !== 'function') return;
+            var canvas = document.getElementById(canvasId);
+            if (!canvas) return;
+            var registry = getChartRegistry();
+            if (registry[canvasId]) {
+                try { registry[canvasId].destroy(); } catch (err) {}
+            }
+            var context = canvas.getContext('2d');
+            registry[canvasId] = new Chart(context, config);
+        }
+
+        function renderCharts(tasks, categories) {
+            var days = lastNDays(7);
+            var dayLabel = days.map(function (d) { return d.slice(5); });
+
+            var plannedByDay = {};
+            var completedByDay = {};
+            var studyByDay = {};
+            var sportsByDay = {};
+            var entertainmentByDay = {};
+            days.forEach(function (day) {
+                plannedByDay[day] = 0;
+                completedByDay[day] = 0;
+                studyByDay[day] = 0;
+                sportsByDay[day] = 0;
+                entertainmentByDay[day] = 0;
+            });
+
+            var categoryActual = {};
+            var categoryPlanned = {};
+            var categoryDaily = {};
+            var completionType = { onTime: 0, overtime: 0, unfinished: 0 };
+
+            tasks.forEach(function (task) {
+                var date = getTaskDate(task);
+                var completedDate = getTaskCompletedDate(task);
+                var completed = isTaskCompleted(task);
+                var actualMinutes = getActualMinutes(task);
+                var plannedMinutes = getPlannedMinutes(task);
+                var categoryName = getCategoryName(task, categories);
+
+                if (!categoryActual[categoryName]) categoryActual[categoryName] = 0;
+                if (!categoryPlanned[categoryName]) categoryPlanned[categoryName] = 0;
+                if (!categoryDaily[categoryName]) categoryDaily[categoryName] = {};
+
+                categoryPlanned[categoryName] += plannedMinutes;
+                categoryActual[categoryName] += actualMinutes;
+                if (date && days.indexOf(date) !== -1) {
+                    categoryDaily[categoryName][date] = (categoryDaily[categoryName][date] || 0) + actualMinutes;
+                }
+
+                if (date && days.indexOf(date) !== -1) plannedByDay[date] += 1;
+                if (completed && completedDate && days.indexOf(completedDate) !== -1) completedByDay[completedDate] += 1;
+
+                if (completed) {
+                    if (plannedMinutes > 0 && actualMinutes > plannedMinutes) completionType.overtime += 1;
+                    else completionType.onTime += 1;
+                } else {
+                    completionType.unfinished += 1;
+                }
+
+                var timeBucketDay = completedDate || date;
+                if (timeBucketDay && days.indexOf(timeBucketDay) !== -1) {
+                    var categoryText = String(categoryName).toLowerCase();
+                    if (/运动|体育|锻炼|跑步|球|swim|sport/.test(categoryText)) {
+                        sportsByDay[timeBucketDay] += actualMinutes / 60;
+                    } else if (/娱乐|休闲|游戏|movie|music|video/.test(categoryText)) {
+                        entertainmentByDay[timeBucketDay] += actualMinutes / 60;
+                    } else {
+                        studyByDay[timeBucketDay] += actualMinutes / 60;
+                    }
+                }
+            });
+
+            renderChart('dailyTasksChart', {
+                type: 'bar',
+                data: {
+                    labels: dayLabel,
+                    datasets: [
+                        { label: '计划数', data: days.map(function (d) { return plannedByDay[d]; }), backgroundColor: 'rgba(75,108,183,0.5)' },
+                        { label: '完成数', data: days.map(function (d) { return completedByDay[d]; }), backgroundColor: 'rgba(76,175,80,0.6)' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            renderChart('dailyTimeChart', {
+                type: 'line',
+                data: {
+                    labels: dayLabel,
+                    datasets: [
+                        { label: '学习(h)', data: days.map(function (d) { return Number(studyByDay[d].toFixed(2)); }), borderColor: '#3f51b5', backgroundColor: 'rgba(63,81,181,0.2)', fill: true, tension: 0.3 },
+                        { label: '运动(h)', data: days.map(function (d) { return Number(sportsByDay[d].toFixed(2)); }), borderColor: '#ff9800', backgroundColor: 'rgba(255,152,0,0.2)', fill: true, tension: 0.3 },
+                        { label: '娱乐(h)', data: days.map(function (d) { return Number(entertainmentByDay[d].toFixed(2)); }), borderColor: '#9c27b0', backgroundColor: 'rgba(156,39,176,0.2)', fill: true, tension: 0.3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            var categoryNames = Object.keys(categoryActual);
+            if (categoryNames.length === 0) categoryNames = ['暂无数据'];
+            renderChart('categoryPieChart', {
+                type: 'pie',
+                data: {
+                    labels: categoryNames,
+                    datasets: [{
+                        data: categoryNames.map(function (name) { return categoryActual[name] || 0; }),
+                        backgroundColor: ['#4b6cb7', '#4caf50', '#ff9800', '#e91e63', '#00bcd4', '#9c27b0', '#8bc34a', '#607d8b']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            var topCategories = Object.keys(categoryDaily).sort(function (a, b) {
+                return (categoryActual[b] || 0) - (categoryActual[a] || 0);
+            }).slice(0, 5);
+            if (topCategories.length === 0) topCategories = ['暂无数据'];
+
+            renderChart('categoryDailyChart', {
+                type: 'bar',
+                data: {
+                    labels: dayLabel,
+                    datasets: topCategories.map(function (name, idx) {
+                        return {
+                            label: name,
+                            data: days.map(function (d) { return Number((((categoryDaily[name] || {})[d] || 0) / 60).toFixed(2)); }),
+                            backgroundColor: ['#4b6cb7', '#4caf50', '#ff9800', '#e91e63', '#00bcd4'][idx % 5]
+                        };
+                    })
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            var planActualNames = Object.keys(categoryPlanned);
+            if (planActualNames.length === 0) planActualNames = ['暂无数据'];
+            renderChart('planActualChart', {
+                type: 'bar',
+                data: {
+                    labels: planActualNames,
+                    datasets: [
+                        { label: '计划用时(分钟)', data: planActualNames.map(function (name) { return Number((categoryPlanned[name] || 0).toFixed(1)); }), backgroundColor: 'rgba(75,108,183,0.5)' },
+                        { label: '实际用时(分钟)', data: planActualNames.map(function (name) { return Number((categoryActual[name] || 0).toFixed(1)); }), backgroundColor: 'rgba(76,175,80,0.6)' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            renderChart('completionTypeChart', {
+                type: 'doughnut',
+                data: {
+                    labels: ['按时完成', '超时完成', '未完成'],
+                    datasets: [{
+                        data: [completionType.onTime, completionType.overtime, completionType.unfinished],
+                        backgroundColor: ['#4caf50', '#ff9800', '#f44336']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function refreshStatsFallback() {
+            var tasks = getRuntimeTasks();
+            var categories = getRuntimeCategories();
+            if (!Array.isArray(tasks)) return;
+            if (!Array.isArray(categories)) categories = [];
+            updateSubtitleAndCards(tasks);
+            renderCharts(tasks, categories);
+        }
+
+        function scheduleRefresh(delay) {
+            setTimeout(refreshStatsFallback, delay);
+        }
+
+        function bindStatsFallback() {
+            refreshStatsFallback();
+            scheduleRefresh(400);
+            scheduleRefresh(1200);
+
+            ['saveTaskBtn', 'confirmReplaceTimeBtn', 'confirmManualTimeBtn', 'statsFilterBtn'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el || el.dataset.statsFallbackBound === '1') return;
+                el.dataset.statsFallbackBound = '1';
+                el.addEventListener('click', function () { scheduleRefresh(450); });
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', bindStatsFallback, { once: true });
+        } else {
+            bindStatsFallback();
+        }
+
+        document.addEventListener('supabase-storage-ready', function () {
+            setTimeout(bindStatsFallback, 0);
+            scheduleRefresh(900);
+        }, { once: true });
+    })();
+</script>
 <audio id="successSound" preload="auto">
     <source src="success.wav" type="audio/wav">
     您的浏览器不支持音频播放。
